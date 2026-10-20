@@ -209,7 +209,8 @@ const isHoliday = (d,s) => { if(!d||!s.nightWeekends) return false; const wd=new
 const isNight =(t,s,d) => { if(!t) return false; if(isHoliday(d,s)) return true; const f=s.nightFrom,to=s.nightTo; return f>to ? (t>=f||t<to) : (t>=f&&t<to); };
 const tripName = b => b.dir==='out' ? `${b.ss} → ${b.dest}` : `${b.dest} → ${b.ss}`;
 const seatsOf = (pax,extras) => pax + (extras.golf||0);
-const vehicleFor = (seats,max=4) => seats<=max ? 'taxi' : 'grupo';
+const vehicleFor = (seats,max=4,vanMax=8) => seats<=max ? 'taxi' : seats<=vanMax ? 'van' : 'grupo';
+const vanSup = s => (s.vanSupplement ?? 20);
 const hrs = m => (Math.round(m/60*10)/10).toLocaleString('es-ES');
 const toMin = t => { const [h,m]=(t||'00:00').split(':').map(Number); return h*60+m; };
 const toHM = m => { m=Math.max(0,Math.min(23*60+59,Math.round(m))); return `${pad(Math.floor(m/60))}:${pad(m%60)}`; };
@@ -226,7 +227,7 @@ const phoneKey = p => String(p||'').replace(/\D/g,'');
 const LANG_BY_PREFIX = {'+34':'ES','+33':'FR','+49':'DE','+43':'DE','+41':'DE','+39':'IT','+351':'PT'};
 function quote(f, s){
   const t = s.tarifas.find(x=>x.name===f.dest); if(!t) return null;
-  const leg = (time,date) => { const n=isNight(time,s,date); return {night:n, price:(n?t.night:t.day)}; };
+  const leg = (time,date) => { const n=isNight(time,s,date); return {night:n, price:(n?t.night:t.day)+(f.vehicle==='van'?vanSup(s):0)}; };
   const a = leg(f.time,f.date), b = f.roundTrip ? leg(f.retTime,f.retDate) : null;
   const extras = s.extras.reduce((sum,e)=>sum+(f.extras[e.id]||0)*e.price,0) * (f.roundTrip?2:1);
   return {out:a, ret:b, extras, total:a.price+(b?b.price:0)+extras, tariff:t};
@@ -323,7 +324,7 @@ function clientsOf(bookings){
 }
 // Festivos de Cataluña (revisar cada año y añadir las fiestas locales de Santa Susanna)
 const DEFAULT_HOLIDAYS = ['2026-11-01','2026-12-06','2026-12-08','2026-12-25','2026-12-26','2027-01-01','2027-01-06','2027-03-26','2027-03-29','2027-05-01','2027-06-24','2027-08-15','2027-09-11','2027-10-12','2027-11-01','2027-12-06','2027-12-08','2027-12-25','2027-12-26'];
-const DEFAULT_SETTINGS = {nightFrom:'20:00',nightTo:'08:00',nightWeekends:true,holidays:DEFAULT_HOLIDAYS,payDriver:false,seats:4,workHours:14,automations:DEFAULT_AUTOMATIONS,tarifas:DEFAULT_TARIFAS,extras:DEFAULT_EXTRAS};
+const DEFAULT_SETTINGS = {nightFrom:'20:00',nightTo:'08:00',nightWeekends:true,holidays:DEFAULT_HOLIDAYS,payDriver:false,seats:4,vanSeats:8,vanSupplement:20,workHours:14,automations:DEFAULT_AUTOMATIONS,tarifas:DEFAULT_TARIFAS,extras:DEFAULT_EXTRAS};
 
 /* ---------- Piezas de interfaz ---------- */
 function Chip({status}){ const s=STATUS[status]; return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[13px] font-semibold whitespace-nowrap ${s.cls}`}>{s.label}</span>; }
@@ -414,7 +415,7 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
   const ss = f.from&&f.from.type==='ss'?f.from:(f.to&&f.to.type==='ss'?f.to:null);
   const dest = f.from&&f.from.type==='dest'?f.from:(f.to&&f.to.type==='dest'?f.to:null);
   const dir = f.from&&f.from.type==='ss'?'out':'in';
-  const maxSeats=settings.seats||4; const seats = seatsOf(f.pax,f.extras); const vehicle = vehicleFor(seats,maxSeats);
+  const maxSeats=settings.seats||4; const seats = seatsOf(f.pax,f.extras); const vehicle = vehicleFor(seats,maxSeats,settings.vanSeats||8);
   const lead = d => dest&&d==='in'?legMin(dest.label,settings):0;
   const clash = ss&&dest&&f.time ? conflictsOf({id:'nuevo',date:f.date,time:f.time,dest:dest.label,dir},bookings||[],settings) : [];
   const freeFrom = clash.length ? toHM(Math.max(...clash.map(x=>spanOf(x,settings).e))+lead(dir)) : null;
@@ -445,7 +446,7 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
     else if(f.roundTrip&&f.time&&(f.retDate+f.retTime)<=(f.date+f.time)) er.ret='La vuelta tiene que ser después de la ida.';
     else if(pairClash) er.ret='La vuelta es demasiado pronto: el taxi aún está haciendo la ida.';
     else if(!staff&&clashRet.length) er.ret=`A esa hora de vuelta ya tenemos un viaje. Prueba a partir de las ${freeRet}.`;
-    if(vehicle==='grupo') er.pax=seats<=8?`Para ${seats} personas usamos una van de hasta 8 plazas (con suplemento). Escríbenos por WhatsApp o llama al 937 67 85 71 y te damos el precio.`:`Para más de 8 personas usamos varios vehículos. Llámanos al 937 67 85 71 y lo organizamos.`;
+    if(vehicle==='grupo') er.pax=`Para más de ${settings.vanSeats||8} personas usamos varios vehículos. Llámanos al 937 67 85 71 y lo organizamos.`;
     if(!staff&&clash.length) er.time=`A esa hora ya tenemos un viaje. Prueba a partir de las ${freeFrom}.`;
     if(!f.name.trim()) er.name='Escribe tu nombre.';
     if(f.phone.replace(/\D/g,'').length<6) er.phone='Escribe un teléfono válido.';
@@ -547,10 +548,11 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
         <div className="flex items-center gap-3"><span className="text-muted"><I.Lug/></span><div><div className="font-semibold">Maleta {m.name.toLowerCase()}</div><div className="text-[13px] text-muted tnum">{m.dims}</div></div></div>
         <Stepper id={'f-mal-'+m.id} label={'maletas '+m.name.toLowerCase()} value={f.luggage[m.id]} max={8} onChange={v=>set('luggage',{...f.luggage,[m.id]:v})}/>
       </div>)}
-      <div className={`mt-3 flex items-start gap-3 rounded-xl p-3.5 ${vehicle==='grupo'?'bg-badsoft text-bad':'bg-sunken'}`}>
-        <span className="mt-0.5">{vehicle==='grupo'?<I.Alert/>:<I.Car/>}</span>
+      <div className={`mt-3 flex items-start gap-3 rounded-xl p-3.5 ${vehicle==='grupo'?'bg-badsoft text-bad':vehicle==='van'?'border border-brand bg-brandsoft':'bg-sunken'}`}>
+        <span className="mt-0.5">{vehicle==='grupo'?<I.Alert/>:vehicle==='van'?<I.CarSide/>:<I.Car/>}</span>
         <div className="text-[14px]">{vehicle==='taxi'&&<><b>Taxi</b> · hasta {maxSeats} plazas{f.extras.golf?` (las bolsas de golf ocupan plaza: vais ${seats})`:''}.{bigBags>4&&<> Con tanto equipaje grande, indícalo en comentarios para confirmar que cabe.</>}</>}
-          {vehicle==='grupo'&&<>{seats<=8?<><b>Sois {seats}: os llevamos en una van de hasta 8 plazas.</b> Tiene suplemento: escríbenos por WhatsApp o llama al 937 67 85 71 y te damos el precio.</>:<><b>Sois {seats}: hacen falta varios vehículos.</b> Llámanos al 937 67 85 71 y lo organizamos.</>}</>}
+          {vehicle==='van'&&<><b>Van · hasta {settings.vanSeats||8} plazas</b> · sois {seats}{f.extras.golf?' (con las bolsas de golf)':''}. Suplemento de van: <b className="tnum">{eur(vanSup(settings))}</b> por trayecto, ya incluido en el precio.</>}
+          {vehicle==='grupo'&&<><b>Sois {seats}: hacen falta varios vehículos.</b> Llámanos al 937 67 85 71 y lo organizamos.</>}
           {errors.pax&&vehicle!=='grupo'&&<div className="font-semibold text-bad">{errors.pax}</div>}</div>
       </div>
     </Section>
@@ -636,7 +638,8 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
             ...(q?[['Ida',`${eur(q.out.price)} · ${q.out.night?'noche':'día'}`]]:[]),
             ...(q&&q.ret?[['Vuelta',`${eur(q.ret.price)} · ${q.ret.night?'noche':'día'}`]]:[]),
             ...(q&&q.extras>0?[['Extras',eur(q.extras)]]:[]),
-            ['Plazas',vehicle==='grupo'?`${seats} (máx. ${maxSeats})`:`${seats} de ${maxSeats}`],
+            ...(q&&vehicle==='van'?[['Suplemento van',`${eur(vanSup(settings)*(f.roundTrip?2:1))}${f.roundTrip?' (ida y vuelta)':''}`]]:[]),
+            ['Vehículo',vehicle==='grupo'?`${seats} plazas: varios vehículos`:vehicle==='van'?`Van · ${seats} de ${settings.vanSeats||8} plazas`:`Taxi · ${seats} de ${maxSeats} plazas`],
             ['Equipaje',`${f.luggage.s+f.luggage.m+f.luggage.l} maleta${f.luggage.s+f.luggage.m+f.luggage.l===1?'':'s'}`],
             ['Pago',PAY[f.payment]],
           ].map(([k,v])=><div key={k} className="flex justify-between gap-3 py-2.5"><dt className="text-muted">{k}</dt><dd className={`text-right font-semibold tnum ${v==='Falta la hora'||v==='Falta el día'?'text-warn':''}`}>{v}</dd></div>)}
@@ -649,7 +652,7 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
 
     <div className={`fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface lg:hidden ${panel?"md:left-64":""}`} style={{paddingBottom:'max(12px, env(safe-area-inset-bottom, 0px))',paddingLeft:'max(16px, env(safe-area-inset-left, 0px))',paddingRight:'max(16px, env(safe-area-inset-right, 0px))'}}>
       <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 pt-3">
-        <div className="min-w-0"><div className="text-[13px] text-muted">{q?`${tripName({dir,ss:ss.label,dest:dest.label})}`:'Elige el trayecto para ver el precio'}</div>
+        <div className="min-w-0"><div className="truncate text-[13px] text-muted">{q?`${tripName({dir,ss:ss.label,dest:dest.label})}`:'Elige el trayecto para ver el precio'}</div>
           <div className="text-[20px] font-extrabold tnum">{q?eur(q.total):'—'}{q&&q.extras>0&&<span className="ml-2 text-[13px] font-semibold text-muted">incl. {eur(q.extras)} de extras</span>}</div></div>
         <button type="submit" className="h-12 shrink-0 rounded-full bg-brandstrong px-6 font-bold text-white hover:opacity-90">{staff?(q?`Reservar · ${eur(q.total)}`:'Reservar'):(q?'Reservar y pagar':'Reservar')}</button>
       </div>
@@ -992,7 +995,7 @@ function Detail({b,close,update,bookings,open,settings}){
           {b.roundTrip&&<div className="text-[14px] text-muted">Vuelta: {dayLabel(b.retDate)} a las {b.retTime}{b.linked&&<> · <button onClick={()=>open(b.linked)} className="font-semibold text-brandink underline underline-offset-2">ver {b.linked}</button></>}</div>}
           {b.isReturn&&<div className="text-[14px] text-muted">Viaje de vuelta de <button onClick={()=>open(b.linked)} className="font-semibold text-brandink underline underline-offset-2">{b.linked}</button></div>}
           <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-[14px]">
-            {[['Pasajeros',`${b.pax}`],['Maletas',`${b.luggage.s} peq. · ${b.luggage.m} med. · ${b.luggage.l} gr.`],['Importe',`${eur(b.total)}${b.night?' · noche':''}`],['Pago',`${PAY[b.payment]} · ${b.paid?'pagado':'pendiente de pago'}`],['Teléfono',b.phone],['Idioma',b.lang],['Ofertas',b.marketing?'Acepta recibirlas':'No acepta'],...(b.flight?[['Vuelo',b.flight]]:[]),...(b.email?[['Email',b.email]]:[])].map(([k,v])=>
+            {[['Pasajeros',`${b.pax}${b.vehicle==='van'?' · van':''}`],['Maletas',`${b.luggage.s} peq. · ${b.luggage.m} med. · ${b.luggage.l} gr.`],['Importe',`${eur(b.total)}${b.night?' · noche':''}`],['Pago',`${PAY[b.payment]} · ${b.paid?'pagado':'pendiente de pago'}`],['Teléfono',b.phone],['Idioma',b.lang],['Ofertas',b.marketing?'Acepta recibirlas':'No acepta'],...(b.flight?[['Vuelo',b.flight]]:[]),...(b.email?[['Email',b.email]]:[])].map(([k,v])=>
               <div key={k} className="min-w-0"><dt className="text-[12px] font-bold uppercase tracking-wider text-muted">{k}</dt><dd className="break-words font-semibold tnum">{v}</dd></div>)}
           </dl>
           {!b.paid&&b.status!=='cancelada'&&<div className="mt-3 flex flex-wrap gap-2"><button onClick={()=>update(b.id,{paid:true},'Marcada como cobrada')} className="h-10 rounded-full border border-line px-4 text-[14px] font-semibold hover:border-brand">Marcar como cobrada</button>
@@ -1424,6 +1427,8 @@ function Settings({settings,setSettings,onReset}){
           <Field label="Tarifa de noche desde" htmlFor="s-noche-d"><input id="s-noche-d" type="time" value={settings.nightFrom} onChange={e=>up('nightFrom',e.target.value)} className={inputCls}/></Field>
           <Field label="Hasta" htmlFor="s-noche-h"><input id="s-noche-h" type="time" value={settings.nightTo} onChange={e=>up('nightTo',e.target.value)} className={inputCls}/></Field>
           <Field label="Plazas del taxi" htmlFor="s-plazas" hint="Las bolsas de golf cuentan como plaza"><input id="s-plazas" type="number" min="1" max="8" value={settings.seats||4} onChange={e=>up('seats',Math.max(1,Math.min(8,+e.target.value||1)))} className={inputCls}/></Field>
+          <Field label="Plazas de la van" htmlFor="s-van-plazas" hint="De 5 a 8"><input id="s-van-plazas" type="number" min="5" max="8" value={settings.vanSeats||8} onChange={e=>up('vanSeats',Math.max(5,Math.min(8,+e.target.value||8)))} className={inputCls}/></Field>
+          <Field label="Suplemento van (por trayecto)" htmlFor="s-van-sup" hint="Valor de ejemplo: confírmalo"><input id="s-van-sup" type="number" min="0" value={settings.vanSupplement??20} onChange={e=>up('vanSupplement',Math.max(0,+e.target.value||0))} className={inputCls}/></Field>
           <Field label="Horas de trabajo al día" htmlFor="s-horas" hint="Para calcular cuánto está ocupado el taxi"><input id="s-horas" type="number" min="1" max="24" value={settings.workHours||14} onChange={e=>up('workHours',Math.max(1,Math.min(24,+e.target.value||1)))} className={inputCls}/></Field>
           <p className="flex items-center gap-2 self-end rounded-xl bg-sunken p-3.5 text-[14px] font-semibold"><I.Lock size={16}/>Todas las reservas se pagan por adelantado</p>
         </div>
@@ -1491,7 +1496,7 @@ function ModeBar({mode,setMode}){
 /* Vista del cliente: el formulario tal como iría en su web */
 // «Qué incluye tu reserva»: mismo bloque que la home de la web nueva
 function TrustBlock(){
-  const cards=[[I.Tag,'Precio fijo','Sin sorpresas, sin taxímetro'],[I.CarSide,'Taxi grande','Vans de 6, 7 y 8 plazas · bajo consulta'],[I.ShieldOk,'Seguridad niños','Sillitas y elevadores infantiles'],[I.Lock,'Pago seguro','Tarjeta o PayPal']];
+  const cards=[[I.Tag,'Precio fijo','Sin sorpresas, sin taxímetro'],[I.CarSide,'Taxi grande','Vans de 6, 7 y 8 plazas · resérvala aquí'],[I.ShieldOk,'Seguridad niños','Sillitas y elevadores infantiles'],[I.Lock,'Pago seguro','Tarjeta o PayPal']];
   const tick=<span aria-hidden="true" className="mr-1">✓</span>;
   return <section aria-labelledby="incluye-t" className="mb-8 mt-3">
     <h2 id="incluye-t" className="mb-5 text-center text-[14px] font-extrabold uppercase tracking-[.06em] text-brandink">Qué incluye tu reserva</h2>
