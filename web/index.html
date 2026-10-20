@@ -295,7 +295,7 @@ function seed(){
   const PER=[2,3,2,3,2,3,4,3,2,3,4,3,3];
   const DST=['Aeropuerto Barcelona-El Prat','Aeropuerto Girona-Costa Brava','Lloret Centre / Bus','Barcelona Sants','Malgrat Centre','Calella Centre / Hospital','La Roca Village','Blanes Centre','Pineda Estació','Tossa de Mar'];
   let k=0;
-  PER.forEach((n,i)=>{const ago=i+1;for(let j=0;j<n;j++){k++;const fi=(k*7)%16,li=(k*11)%16;const dest=DST[(k*3)%DST.length];const tf=DEFAULT_TARIFAS.find(x=>x.name===dest);
+  PER.forEach((n,i)=>{const ago=i+1;for(let j=0;j<n;j++){k++;const fi=k%16,li=(k*5+Math.floor(k/16))%16;const dest=DST[(k*3)%DST.length];const tf=DEFAULT_TARIFAS.find(x=>x.name===dest);
     const hh=7+j*4,mm=((k*13)%4)*15;const pax=1+((k*3)%4);
     L.push(mk({date:addDays(-ago),time:`${pad(hh)}:${pad(mm)}`,dir:k%2?'in':'out',ss:PUNTOS_SS[(k*5)%28],dest,pax,name:`${FN[fi]} ${LN[li]}`,phone:`+34 6${pad((k*37)%100)} ${100+(k*53)%900} ${100+(k*71)%900}`,
       lang:LG[fi],email:k%3?`cliente${k}@example.com`:'',marketing:k%2===0,status:k%17===0?'cancelada':'completada',driverId:'d1',total:hh>=21?tf.night:tf.day,
@@ -317,7 +317,8 @@ function clientsOf(bookings){
   [...bookings].sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).forEach(b=>{const pk=phoneKey(b.phone);const c=(map[pk]=map[pk]||{name:b.name,phone:b.phone,lang:b.lang,email:'',marketing:false,list:[]});
     c.list.push(b); c.name=b.name; c.lang=b.lang; if(b.email)c.email=b.email; if(b.marketing!==undefined)c.marketing=!!b.marketing;});
   return Object.values(map).map(c=>{const ok=c.list.filter(b=>b.status!=='cancelada');const dates=ok.map(b=>b.date).sort();
-    return {...c,count:ok.length,spent:ok.reduce((s,b)=>s+b.total,0),first:dates[0]||c.list[0].date,last:dates[dates.length-1]||c.list[0].date,
+    const past=dates.filter(d=>d<=TODAY);
+    return {...c,count:ok.length,spent:ok.reduce((s,b)=>s+b.total,0),first:dates[0]||c.list[0].date,last:dates[dates.length-1]||c.list[0].date,lastPast:past[past.length-1]||null,next:dates.find(d=>d>TODAY)||null,
       airport:ok.some(b=>isAirport(b.dest)),daysSince:dates.length?Math.round((new Date(TODAY)-new Date(dates[dates.length-1]))/864e5):9999}});
 }
 // Festivos de Cataluña (revisar cada año y añadir las fiestas locales de Santa Susanna)
@@ -588,10 +589,10 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
       {f.extras.parada>0&&<p className="mt-3 text-[14px] text-muted">Indica en comentarios dónde es la parada adicional.</p>}
     </Section>
 
-    <Section title={staff?"Tus datos":"5. Tus datos"} icon={I.Contacts} className={staff?'md:col-span-2':''}>
+    <Section title={staff?"Datos del cliente":"5. Tus datos"} icon={I.Contacts} className={staff?'md:col-span-2':''}>
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Nombre y apellidos" htmlFor="f-nombre" error={errors.name}><input id="f-nombre" autoComplete="name" value={f.name} onChange={e=>set('name',e.target.value)} className={inputCls} data-err={errors.name?1:0}/></Field>
-        <Field label="Teléfono (WhatsApp)" htmlFor="f-tel" error={errors.phone} hint="Por si tenemos que avisarte el día del viaje">
+        <Field label="Teléfono (WhatsApp)" htmlFor="f-tel" error={errors.phone} hint={staff?"Para avisarle el día del viaje":"Por si tenemos que avisarte el día del viaje"}>
           <div className="flex gap-2"><select id="f-prefijo" aria-label="Prefijo" value={f.prefix} onChange={e=>set('prefix',e.target.value)} className="h-12 rounded-xl border border-line bg-surface px-2 text-[16px]">
             {['+34','+44','+33','+49','+31','+32','+39','+351','+353','+41','+43','+45','+46','+47','+48','+420','+1'].map(p=><option key={p}>{p}</option>)}</select>
           <input id="f-tel" type="tel" autoComplete="tel-national" inputMode="tel" value={f.phone} onChange={e=>set('phone',e.target.value)} onBlur={()=>{if(f.phone.trim()&&f.phone.replace(/\D/g,'').length<6)setErrors(e=>({...e,phone:'Escribe un teléfono válido.'}))}} aria-invalid={!!errors.phone} className={inputCls} data-err={errors.phone?1:0}/></div></Field>
@@ -617,7 +618,7 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
         <span>He leído y acepto las condiciones del servicio y la política de privacidad.{errors.terms&&<span className="block font-semibold text-bad">{errors.terms}</span>}</span></label>}
       <label htmlFor="f-ofertas" className={`${staff?'mt-4':'mt-3'} flex items-start gap-3 text-[14px]`}>
         <input id="f-ofertas" type="checkbox" checked={f.marketing} onChange={e=>set('marketing',e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[var(--brand-strong)]"/>
-        <span>{staff?'El cliente acepta recibir ofertas por email':'Quiero recibir ofertas y descuentos por email'} <span className="text-muted">(opcional, puedes darte de baja cuando quieras)</span></span></label>
+        <span>{staff?'El cliente acepta recibir ofertas por email':'Quiero recibir ofertas y descuentos por email'} <span className="text-muted">{staff?"(opcional; podrá darse de baja cuando quiera)":"(opcional, puedes darte de baja cuando quieras)"}</span></span></label>
     </Section>
     </div>
 
@@ -627,7 +628,7 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
           <div className="text-[12px] font-bold uppercase tracking-wider text-[#FFD940]">Resumen</div>
           {q?<><div className="mt-2 text-[15px] font-semibold leading-snug">{tripName({dir,ss:ss.label,dest:dest.label})}</div>
             <div className="mt-3 text-[34px] font-extrabold leading-none tnum">{eur(q.total)}</div><div className="mt-1 text-[13px] text-ondeep">{staff?'Precio fijo, sin sorpresas':'Precio cerrado: peajes, IVA y propinas incluidos'}</div></>
-            :<p className="mt-2 text-[14px] text-ondeep">Elige desde dónde y a dónde vas para ver el precio.</p>}
+            :<p className="mt-2 text-[14px] text-ondeep">{staff?"Elige el trayecto para ver el precio.":"Elige desde dónde y a dónde vas para ver el precio."}</p>}
         </div>
         <dl className="divide-y divide-line px-5 text-[14px]">
           {[
@@ -763,6 +764,8 @@ function Today({bookings,open,assign,settings,onStatus}){
   const clashes=today.filter(b=>b.status!=='completada').map(b=>({b,c:conflictsOf(b,today,settings)})).filter(x=>x.c.length&&x.c.every(c=>c.time>=x.b.time));
   unpaid.forEach(b=>alerts.push({b,text:`Sin pagar · ${dayLabel(b.date)} ${b.time}: envíale el enlace de pago`,tone:'warn'}));
   clashes.forEach(({b,c})=>alerts.unshift({b,text:`Se solapa con la recogida de las ${c.map(x=>x.time).join(' y ')}: el taxi no llega a las dos`,tone:'bad'}));
+  const RANK={bad:3,warn:2,info:1}; const byId={}; const alertsShown=[];
+  alerts.forEach(a=>{const m=byId[a.b.id]; if(!m){byId[a.b.id]={...a,parts:[a.text]}; alertsShown.push(byId[a.b.id]);} else { m.parts.push(a.text); if(RANK[a.tone]>RANK[m.tone]) m.tone=a.tone; }});
   const busy=today.reduce((s,b)=>s+busyMin(b.dest,settings),0); const hours=settings.workHours||14; const occ=Math.min(100,Math.round(busy/(hours*60)*100));
   const tiles=[{k:'Viajes hoy',v:today.length,s:`${today.filter(b=>b.status==='completada').length} completados`},{k:'Por confirmar',v:pending.length,s:'de hoy en adelante',tone:pending.length?'text-warn':''},
     {k:'Facturación de hoy',v:eur(income),s:toCollect?`${eur(toCollect)} pendiente de pago`:'Todo pagado'},{k:'Taxi ocupado hoy',v:`${occ} %`,s:`${hrs(busy)} h de ${hours} h de trabajo`,bar:occ}];
@@ -772,14 +775,14 @@ function Today({bookings,open,assign,settings,onStatus}){
       <div className="text-[13px] font-semibold text-muted">{t.k}</div><div className={`mt-1 text-[26px] font-extrabold tnum ${t.tone||''}`}>{t.v}</div><div className="text-[13px] text-muted">{t.s}</div>
       {t.bar!==undefined&&<div className="mt-2 h-2 overflow-hidden rounded-full bg-sunken" role="img" aria-label={`Ocupación ${t.bar} %`}><div className="h-full rounded-full bg-brand" style={{width:t.bar+'%'}}></div></div>}</div>)}</div>
     <TrendChart bookings={bookings}/>
-    {alerts.length>0&&<div className="flex flex-col gap-2">{alerts.map((a,i)=><Notice key={i} tone={a.tone} onClick={()=>open(a.b.id)}
-      icon={a.tone==='info'?<I.Plane size={18}/>:a.tone==='bad'?<I.Alert size={18}/>:<I.Clock size={18}/>} title={a.text}><span className="block truncate">{a.b.name} · {tripName(a.b)}</span></Notice>)}</div>}
+    {alertsShown.length>0&&<div className="flex flex-col gap-2">{alertsShown.map((a,i)=><Notice key={i} tone={a.tone} onClick={()=>open(a.b.id)}
+      icon={a.tone==='info'?<I.Plane size={18}/>:a.tone==='bad'?<I.Alert size={18}/>:<I.Clock size={18}/>} title={a.parts.join(" · ")}><span className="block truncate">{a.b.name} · {tripName(a.b)}</span></Notice>)}</div>}
     <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
       <div className="min-w-0 rounded-2xl border border-line bg-surface">
         <div className="flex items-center justify-between border-b border-line p-4"><h2 className="font-bold">Recogidas de hoy</h2><span className="text-[13px] text-muted">{dayLabel(TODAY)}</span></div>
         <ol className="divide-y divide-line">{today.map(b=>{const d=DRIVERS.find(x=>x.id===b.driverId);const isNext=nextB&&b.id===nextB.id;const past=b.status==='completada';return <li key={b.id} className={isNext?'bg-brandsoft':''}><button onClick={()=>open(b.id)} className={`flex w-full items-center gap-3 p-4 text-left ${isNext?'':'hover:bg-sunken'} ${past?'bg-sunken':''}`}>
           <span className="w-14 shrink-0"><span className="block text-[17px] font-extrabold tnum">{b.time}</span>{isNext&&<span className="block text-[12px] font-bold text-brandink">{untilLabel(b.time)}</span>}</span>
-          <span className="min-w-0 flex-1">{isNext&&<span className="mb-0.5 block text-[12px] font-bold uppercase tracking-wider text-brandink">Siguiente recogida</span>}<span className="block truncate font-semibold">{tripName(b)}</span><span className="block truncate text-[13px] text-muted">{b.name} · {b.pax} pax · {b.dir==='in'?`sale a las ${toHM(spanOf(b,settings).a)} · `:''}libre a las {toHM(spanOf(b,settings).e)}</span></span>
+          <span className="min-w-0 flex-1">{isNext&&<span className="mb-0.5 block text-[12px] font-bold uppercase tracking-wider text-brandink">Siguiente recogida</span>}<span className="block font-semibold leading-snug sm:truncate">{tripName(b)}</span><span className="block truncate text-[13px] text-muted">{b.name} · {b.pax} pax · {b.dir==='in'?`sale a las ${toHM(spanOf(b,settings).a)} · `:''}libre a las {toHM(spanOf(b,settings).e)}</span></span>
           <Chip status={b.status}/></button></li>})}</ol>
       </div>
       <div className="min-w-0 rounded-2xl border border-line bg-surface">
@@ -1183,7 +1186,8 @@ function Clients({bookings,open}){
   const rows=all.filter(c=>only==='todos'||(only==='ofertas'?c.marketing:c.count>1))
     .filter(c=>!q||(c.name+c.phone+c.email).toLowerCase().includes(q.toLowerCase()))
     .sort((a,b)=>{const x=val[sort.k](a),y=val[sort.k](b);return (x<y?-1:x>y?1:0)*sort.dir||b.count-a.count});
-  const lastTxt=c=>{const d=new Date(c.last+'T12:00');return c.last>=addDays(-1)&&c.last<=addDays(1)?dayLabel(c.last):d.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'2-digit'})};
+  const fmtD=x=>x>=addDays(-1)&&x<=addDays(1)?dayLabel(x):new Date(x+'T12:00').toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'2-digit'});
+  const lastTxt=c=>!c.count?'—':c.lastPast?fmtD(c.lastPast):c.next?`Próximo · ${fmtD(c.next)}`:'—';
   const Th=({k,children,right})=>{const on=sort.k===k;return <th className={`px-4 py-3 font-bold ${right?'text-right':''}`} aria-sort={on?(sort.dir>0?'ascending':'descending'):'none'}>
     <button onClick={()=>setSort(s=>({k,dir:s.k===k?-s.dir:(k==='name'||k==='lang'?1:-1)}))} className={`inline-flex min-h-[32px] items-center gap-1 uppercase tracking-wider hover:text-ink ${on?'text-ink':''}`}>
       {children}<span aria-hidden="true" className={on?'':'opacity-0'}>{sort.dir>0?'↑':'↓'}</span></button></th>};
@@ -1199,7 +1203,7 @@ function Clients({bookings,open}){
       <button onClick={()=>open(latest(c))} className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-sunken">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-sunken text-[13px] font-bold">{c.lang}</span>
         <span className="min-w-0 flex-1"><span className="flex items-center gap-2"><span className="truncate font-semibold">{c.name}</span>{c.count>1&&<span className="shrink-0 rounded-full bg-goldsoft px-2 text-[11px] font-bold text-goldink">Habitual</span>}</span>
-          <span className="block truncate text-[13px] text-muted tnum">{c.phone} · último {lastTxt(c).toLowerCase()}</span></span>
+          <span className="block truncate text-[13px] text-muted tnum">{c.phone} · {c.lastPast?`último ${lastTxt(c).toLowerCase()}`:lastTxt(c).toLowerCase()}</span></span>
         <span className="shrink-0 text-right"><span className="block font-bold tnum">{eur(c.spent)}</span><span className="block text-[13px] text-muted tnum">{c.count} viaje{c.count>1?'s':''}</span></span>
       </button></li>)}
       {rows.length===0&&<li className="p-6 text-center text-muted">No hay clientes con estos filtros.</li>}</ul>
