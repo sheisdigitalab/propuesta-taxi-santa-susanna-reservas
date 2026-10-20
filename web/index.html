@@ -2,20 +2,19 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-</head>
-<body>
-<title>Central de Reservas Santa Susanna</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Taxi Santa Susanna | Aeropuerto Barcelona y Girona</title>
+<meta name="description" content="Reserva tu taxi en Santa Susanna: aeropuerto de Barcelona desde 142 € y Girona desde 64 €. Precio cerrado y pago online seguro. ¡Reserva en 1 minuto!">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap">
 <style>
 /* Layout: barra lateral verde oscuro con la navegación (abajo en móvil) + área de trabajo clara; el formulario de reserva es una sola columna. */
 :root{
   --bg:#F3F6F4; --surface:#FFFFFF; --sunken:#EAF0EC; --ink:#13201A; --muted:#55645B; --line:#D6E0DA;
-  --brand:#008F4C; --brand-ink:#00854A; --brand-strong:#007A41; --brand-soft:#E3F2EA; --deep:#002313; --on-deep:#D9E7DF;
+  --brand:#008F4C; --brand-ink:#007541; --brand-strong:#007A41; --brand-soft:#E3F2EA; --deep:#002313; --on-deep:#D9E7DF;
   --gold:#FFD940; --gold-ink:#5C4400; --gold-soft:#FFF4C2;
-  --ok:#11663F; --ok-soft:#DDF3E7; --warn:#7A4E00; --warn-soft:#FFF0D2; --bad:#B42318; --bad-soft:#FDE8E7; --info:#1D5FA8; --info-soft:#E6F0FB;
+  --ok:#11663F; --ok-soft:#DDF3E7; --warn:#A15C00; --warn-soft:#FFF4DB; --bad:#B42318; --bad-soft:#FDE8E7; --info:#1D5FA8; --info-soft:#E6F0FB;
   --font:"Montserrat",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
@@ -37,9 +36,12 @@ h1,h2,h3{text-wrap:balance}
 .tnum{font-variant-numeric:tabular-nums}
 :focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:6px}
 input,select,textarea,button{font:inherit;color:inherit}
+@keyframes tss-caret{50%{opacity:0}}.tss-caret{animation:tss-caret .9s steps(1) infinite;margin-left:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .boot{display:grid;place-items:center;height:100%;color:var(--muted);font-weight:600;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px))}
 </style>
+</head>
+<body>
 
 <div id="root"><div class="boot">Cargando la central de reservas…</div></div>
 
@@ -65,14 +67,16 @@ const L = window.LucideReact || {};
 const Ico = (name) => (props) => { const C = L[name]; return C ? <C size={18} strokeWidth={2} aria-hidden="true" {...props}/> : null; };
 const I = {
   Plus:Ico('Plus'),Minus:Ico('Minus'),Search:Ico('Search'),Swap:Ico('ArrowUpDown'),Pin:Ico('MapPin'),Flag:Ico('Flag'),Plane:Ico('PlaneLanding'),
-  Cal:Ico('CalendarDays'),Clock:Ico('Clock'),Users:Ico('Users'),Lug:Ico('Luggage'),Baby:Ico('Baby'),Wheel:Ico('Accessibility'),Bike:Ico('Bike'),
+  Cal:Ico('CalendarDays'),Clock:Ico('Clock'),Users:Ico('Users'),Lug:Ico('Luggage'),Baby:Ico('Baby'),Wheel:Ico('Accessibility'),Bike:Ico('Bike'),Tag:Ico('Tag'),CarSide:Ico('Car'),ShieldOk:Ico('ShieldCheck'),Globe:Ico('Globe'),Paw:Ico('PawPrint'),
   Golf:Ico('Flag'),Stop:Ico('MapPinPlus'),Car:Ico('CarTaxiFront'),Van:Ico('Bus'),Card:Ico('CreditCard'),Wallet:Ico('Wallet'),Cash:Ico('Banknote'),
   Check:Ico('Check'),CheckC:Ico('CircleCheck'),X:Ico('X'),Msg:Ico('MessageCircle'),Phone:Ico('Phone'),Mail:Ico('Mail'),Dash:Ico('LayoutDashboard'),
   List:Ico('ClipboardList'),Route:Ico('Route'),Contacts:Ico('BookUser'),Sliders:Ico('SlidersHorizontal'),NewB:Ico('SquarePen'),Alert:Ico('TriangleAlert'),
   Moon:Ico('Moon'),Sun:Ico('Sun'),Euro:Ico('Euro'),Chev:Ico('ChevronRight'),Back:Ico('ArrowLeft'),Note:Ico('StickyNote'),Reset:Ico('RotateCcw'),
-  Repeat:Ico('Repeat'),Monitor:Ico('Monitor'),Megaphone:Ico('Megaphone'),ArrowR:Ico('ArrowRight'),Timer:Ico('Timer'),Info:Ico('Info'),Hotel:Ico('Hotel'),Stroller:Ico('Baby'),Navigation:Ico('Navigation'),Undo:Ico('Undo2')
+  Repeat:Ico('Repeat'),Monitor:Ico('Monitor'),Megaphone:Ico('Megaphone'),ArrowR:Ico('ArrowRight'),Timer:Ico('Timer'),Info:Ico('Info'),Hotel:Ico('Hotel'),Stroller:Ico('Baby'),Navigation:Ico('Navigation'),Undo:Ico('Undo2'),Lock:Ico('Lock')
 };
 
+const LOGO_FULL='data:image/png;base64,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';
+const LOGO_CREST='data:image/png;base64,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';
 /* ---------- Datos reales de la web (tarifas, puntos de Santa Susanna, extras) ---------- */
 const TARIFAS_RAW = `Aeropuerto Barcelona-El Prat;barcelona;142;153;Aeropuerto · 70-100 min
 Aeropuerto Girona-Costa Brava;girona;64;69;Aeropuerto · 25-35 min
@@ -157,12 +161,13 @@ const CAT_LABEL = {barcelona:'Barcelona',girona:'Girona',costa:'Blanes · Lloret
 const DEFAULT_TARIFAS = TARIFAS_RAW.split('\n').map((l,i)=>{const [name,cat,day,night,info]=l.split(';');return {id:'t'+i,name,cat,day:+day,night:+night,info:info||'',airport:/Aeropuerto/.test(name)}});
 const PUNTOS_SS = ["Hotel AQUA The Breeze","Hotel AQUA Onabrava & Spa","Hotel ALEGRIA Caprici Verd","Hotel ALEGRIA Mar Mediterrania","Hotel ALEGRIA Florida Park","Hotel H·TOP Royal Sun","Hotel H·TOP Royal Sun Suites","Hotel H·TOP Summer Sun","Hotel Atzavara Hotel & Spa","Hotel Mercury","Hotel Dwo Sirius","Hotel Tahítí Playa","Hotel AQUA Aquamarina & Spa","Hotel Caprici Beach","Hotel Montemar Marítim","Hotel Alhambra","Hotel Don Angel","Hotel Indalo Park","Hotel Riviera","Hotel Santa Susanna Resort","Apartaments SANTA SUSANNA Chic! by ALEGRIA","Apartaments Tahítí Playa Suites","Apartaments Bon Repòs","Aparthotel Odissea Park","Càmping Bon Repòs","Càmping El Pinar Platja","Càmping Oasis","Casa rural Can Rosich","Otra dirección en Santa Susanna"];
 const DEFAULT_EXTRAS = [
-  {id:'sillita',name:'Sillita infantil',hint:'Para niños de menos de 25 kg',price:0,max:2,icon:'Baby',group:'ninos'},
-  {id:'elevador',name:'Elevador infantil',hint:'Más de 25 kg y menos de 135 cm',price:0,max:2,icon:'Baby',group:'ninos'},
+  {id:'sillita',name:'Sillita infantil',hint:'Menos de 25 kg · gratis en traslados largos',price:0,max:2,icon:'Baby',group:'ninos'},
+  {id:'elevador',name:'Elevador infantil',hint:'Más de 25 kg y menos de 135 cm · gratis en traslados largos',price:0,max:2,icon:'Baby',group:'ninos'},
   {id:'carrito',name:'Carrito de niño',hint:'Va en el maletero',price:0,max:2,icon:'Stroller',group:'ninos'},
   {id:'ruedas',name:'Silla de ruedas',hint:'Dinos si es plegable',price:0,max:3,icon:'Wheel',group:'movilidad'},
   {id:'bici',name:'Bicicleta',hint:'Solo en funda o caja',price:15,max:2,icon:'Bike',group:'deporte'},
   {id:'golf',name:'Bolsa de golf',hint:'Cada bolsa ocupa una plaza',price:4,max:4,icon:'Golf',group:'deporte',seat:true},
+  {id:'mascota',name:'Mascota',hint:'Sin coste. Dinos si viaja en transportín',price:0,max:2,icon:'Paw',group:'otros'},
   {id:'parada',name:'Parada adicional',hint:'Recoger a alguien sin cambiar el recorrido',price:12,max:3,icon:'Stop',group:'otros'},
 ];
 const MALETAS = [{id:'s',name:'Pequeña',dims:'55×35×20 cm'},{id:'m',name:'Mediana',dims:'70×46×27 cm'},{id:'l',name:'Grande',dims:'80×55×30 cm'}];
@@ -176,7 +181,7 @@ const STATUS = {
   cancelada:{label:'Cancelada',cls:'bg-badsoft text-bad'},
 };
 const CHANNEL = {web:'Web',whatsapp:'WhatsApp',telefono:'Teléfono',hotel:'Hotel'};
-const PAY = {tarjeta:'Tarjeta',paypal:'PayPal',conductor:'En el coche'};
+const PAY = {online:'Pago online',tarjeta:'Pago online',paypal:'Pago online',conductor:'Pago online'};
 
 /* ---------- Utilidades ---------- */
 const pad = n => String(n).padStart(2,'0');
@@ -189,7 +194,9 @@ const dayLabel = iso => { if(iso===TODAY) return 'Hoy'; if(iso===addDays(1)) ret
 const nowHM = () => { const d=new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 const untilLabel = t => { const [h,m]=t.split(':').map(Number); const d=new Date(); const diff=h*60+m-(d.getHours()*60+d.getMinutes());
   if(diff<=0) return 'ahora'; if(diff<60) return `en ${diff} min`; const hh=Math.floor(diff/60),mm=diff%60; return `en ${hh} h${mm?' '+mm+' min':''}`; };
-const isNight =(t,s) => { if(!t) return false; const f=s.nightFrom,to=s.nightTo; return f>to ? (t>=f||t<to) : (t>=f&&t<to); };
+// Festivo o fin de semana: todo el día con tarifa de noche (como indica la web del cliente)
+const isHoliday = (d,s) => { if(!d||!s.nightWeekends) return false; const wd=new Date(d+'T12:00:00').getDay(); return wd===0||wd===6||(s.holidays||[]).includes(d); };
+const isNight =(t,s,d) => { if(!t) return false; if(isHoliday(d,s)) return true; const f=s.nightFrom,to=s.nightTo; return f>to ? (t>=f||t<to) : (t>=f&&t<to); };
 const tripName = b => b.dir==='out' ? `${b.ss} → ${b.dest}` : `${b.dest} → ${b.ss}`;
 const seatsOf = (pax,extras) => pax + (extras.golf||0);
 const vehicleFor = (seats,max=4) => seats<=max ? 'taxi' : 'grupo';
@@ -197,14 +204,20 @@ const hrs = m => (Math.round(m/60*10)/10).toLocaleString('es-ES');
 const toMin = t => { const [h,m]=(t||'00:00').split(':').map(Number); return h*60+m; };
 const toHM = m => { m=Math.max(0,Math.min(23*60+59,Math.round(m))); return `${pad(Math.floor(m/60))}:${pad(m%60)}`; };
 // Tiempo que el coche está ocupado: ida y vuelta a Santa Susanna (duración de la tarifa o estimada por el precio)
-function busyMin(dest,s){ const t=s.tarifas.find(x=>x.name===dest); const m=t&&t.info.match(/(\d+)-(\d+) min/);
-  const one=m?+m[2]:Math.max(15,Math.round((t?t.day:30)*0.8)); return one*2; }
-function conflictsOf(b,bookings,s){ const a=toMin(b.time),e=a+busyMin(b.dest,s);
-  return bookings.filter(x=>x.id!==b.id&&x.date===b.date&&x.status!=='cancelada'&&toMin(x.time)<e&&a<toMin(x.time)+busyMin(x.dest,s)); }
+function legMin(dest,s){ const t=s.tarifas.find(x=>x.name===dest); const m=t&&t.info.match(/(\d+)-(\d+) min/);
+  return m?+m[2]:Math.max(15,Math.round((t?t.day:30)*0.8)); }
+function busyMin(dest,s){ return legMin(dest,s)*2; }
+// Franja en la que el coche está ocupado. Salida de Santa Susanna ('out'): de la hora de recogida a la vuelta.
+// Recogida fuera ('in', p. ej. aeropuerto): el taxi tiene que salir antes para llegar a la hora.
+function spanOf(b,s){ const t=toMin(b.time), one=legMin(b.dest,s); return b.dir==='in'?{a:t-one,e:t+one}:{a:t,e:t+2*one}; }
+function conflictsOf(b,bookings,s){ const {a,e}=spanOf(b,s);
+  return bookings.filter(x=>{if(x.id===b.id||x.date!==b.date||x.status==='cancelada')return false;const y=spanOf(x,s);return y.a<e&&a<y.e}); }
+const phoneKey = p => String(p||'').replace(/\D/g,'');
+const LANG_BY_PREFIX = {'+34':'ES','+33':'FR','+49':'DE','+43':'DE','+41':'DE','+39':'IT','+351':'PT'};
 function quote(f, s){
   const t = s.tarifas.find(x=>x.name===f.dest); if(!t) return null;
-  const leg = (time) => { const n=isNight(time,s); return {night:n, price:(n?t.night:t.day)}; };
-  const a = leg(f.time), b = f.roundTrip ? leg(f.retTime) : null;
+  const leg = (time,date) => { const n=isNight(time,s,date); return {night:n, price:(n?t.night:t.day)}; };
+  const a = leg(f.time,f.date), b = f.roundTrip ? leg(f.retTime,f.retDate) : null;
   const extras = s.extras.reduce((sum,e)=>sum+(f.extras[e.id]||0)*e.price,0) * (f.roundTrip?2:1);
   return {out:a, ret:b, extras, total:a.price+(b?b.price:0)+extras, tariff:t};
 }
@@ -215,14 +228,14 @@ const newCode = () => 'TS-'+(seq++);
 /* ---------- Reservas de ejemplo (ficticias) ---------- */
 function seed(){
   const mk = (o) => ({id:newCode(),createdAt:o.createdAt||new Date().toISOString(),channel:'web',luggage:{s:0,m:1,l:1},extras:{},flight:'',email:'',notes:'',lang:'ES',
-    payment:'tarjeta',paid:true,driverId:null,status:'nueva',roundTrip:false,vehicle:'taxi',log:[],...o});
+    payment:'online',paid:true,driverId:null,status:'nueva',roundTrip:false,vehicle:'taxi',log:[],...o});
   const rel = m => { const d=new Date(); let t=d.getHours()*60+d.getMinutes()+m; t=Math.max(5,Math.min(23*60+55,t)); t=Math.round(t/5)*5; return `${pad(Math.floor(t/60))}:${pad(t%60)}`; };
   const L=[
     mk({date:TODAY,time:rel(-300),dir:'out',ss:'Hotel Riviera',dest:'Aeropuerto Barcelona-El Prat',pax:2,name:'Laura Martín',phone:'+34 611 204 118',lang:'ES',status:'completada',driverId:'d1',flight:'VY 1234',total:153,night:true,channel:'whatsapp'}),
-    mk({date:TODAY,time:rel(-70),dir:'out',ss:'Hotel Alhambra',dest:'Lloret Casino',pax:2,name:'James O\'Neill',phone:'+44 7700 900412',lang:'EN',status:'completada',driverId:'d1',total:35,channel:'hotel',payment:'conductor',paid:true}),
-    mk({date:TODAY,time:rel(15),dir:'in',ss:'Hotel AQUA Onabrava & Spa',dest:'Aeropuerto Girona-Costa Brava',pax:3,name:'Tom Becker',phone:'+49 151 2234 8812',lang:'DE',status:'en_camino',driverId:'d1',flight:'FR 4821',total:64,extras:{sillita:1},luggage:{s:1,m:2,l:0}}),
-    mk({date:TODAY,time:rel(100),dir:'out',ss:'Hotel Santa Susanna Resort',dest:'La Roca Village',pax:4,name:'Marta Puig',phone:'+34 678 552 301',lang:'CA',status:'nueva',total:79,payment:'conductor',paid:false,channel:'telefono'}),
-    mk({date:TODAY,time:rel(130),dir:'in',ss:'Càmping Bon Repòs',dest:'Aeropuerto Barcelona-El Prat',pax:2,name:'Sophie Lambert',phone:'+33 6 12 44 90 18',lang:'FR',status:'nueva',flight:'VY 8017',total:142,flightNote:'Vuelo con 40 min de retraso',channel:'web'}),
+    mk({date:TODAY,time:rel(-70),dir:'out',ss:'Hotel Alhambra',dest:'Lloret Casino',pax:2,name:'James O\'Neill',phone:'+44 7700 900412',lang:'EN',status:'completada',driverId:'d1',total:35,channel:'hotel',payment:'online',paid:true}),
+    mk({date:TODAY,time:rel(30),dir:'in',ss:'Hotel AQUA Onabrava & Spa',dest:'Aeropuerto Girona-Costa Brava',pax:3,name:'Tom Becker',phone:'+49 151 2234 8812',lang:'DE',status:'en_camino',driverId:'d1',flight:'FR 4821',total:64,extras:{sillita:1},luggage:{s:1,m:2,l:0}}),
+    mk({date:TODAY,time:rel(100),dir:'out',ss:'Hotel Santa Susanna Resort',dest:'La Roca Village',pax:4,name:'Marta Puig',phone:'+34 678 552 301',lang:'CA',status:'nueva',total:79,payment:'online',paid:false,channel:'telefono'}),
+    mk({date:TODAY,time:rel(240),dir:'in',ss:'Càmping Bon Repòs',dest:'Aeropuerto Barcelona-El Prat',pax:2,name:'Sophie Lambert',phone:'+33 6 12 44 90 18',lang:'FR',status:'nueva',flight:'VY 8017',total:142,flightNote:'Vuelo con 40 min de retraso',channel:'web'}),
     mk({date:TODAY,time:rel(360),dir:'out',ss:'Hotel H·TOP Royal Sun',dest:'Barcelona Sants',pax:4,name:'Familia Duarte',phone:'+351 912 330 471',lang:'PT',status:'asignada',driverId:'d1',total:123,extras:{carrito:1},luggage:{s:2,m:2,l:2}}),
     mk({date:addDays(1),time:'05:50',dir:'out',ss:'Hotel ALEGRIA Florida Park',dest:'Aeropuerto Barcelona-El Prat',pax:3,name:'Anna Svensson',phone:'+46 70 123 45 67',lang:'EN',status:'nueva',total:153,night:true,extras:{elevador:1}}),
     mk({date:addDays(1),time:'10:00',dir:'out',ss:'Hotel Riviera',dest:'Port de Barcelona',pax:2,name:'Carlos Méndez',phone:'+34 644 908 220',lang:'ES',status:'asignada',driverId:'d1',total:130,extras:{ruedas:1},notes:'Silla de ruedas plegable'}),
@@ -230,7 +243,7 @@ function seed(){
     mk({date:addDays(1),time:'22:30',dir:'in',ss:'Hotel Mercury',dest:'Aeropuerto Barcelona-El Prat',pax:3,name:'Grupo Kowalski',phone:'+48 601 223 904',lang:'EN',status:'nueva',flight:'LO 445',total:153,night:true,extras:{golf:1},luggage:{s:0,m:2,l:2}}),
     mk({date:addDays(2),time:'08:30',dir:'out',ss:'Hotel Tahítí Playa',dest:'Aeropuerto de Reus',pax:4,name:'Elena Rossi',phone:'+39 347 221 8890',lang:'IT',status:'nueva',total:290,extras:{bici:2},roundTrip:false}),
     mk({date:addDays(-1),time:'18:10',dir:'in',ss:'Hotel Riviera',dest:'Aeropuerto Barcelona-El Prat',pax:2,name:'Laura Martín',phone:'+34 611 204 118',lang:'ES',status:'completada',driverId:'d1',total:142,channel:'whatsapp'}),
-    mk({date:addDays(-1),time:'21:40',dir:'out',ss:'Hotel Indalo Park',dest:'Blanes Centre',pax:3,name:'Mark Jensen',phone:'+45 20 11 22 33',lang:'EN',status:'cancelada',total:22,night:true,payment:'conductor',paid:false}),
+    mk({date:addDays(-1),time:'21:40',dir:'out',ss:'Hotel Indalo Park',dest:'Blanes Centre',pax:3,name:'Mark Jensen',phone:'+45 20 11 22 33',lang:'EN',status:'cancelada',total:22,night:true,payment:'online',paid:false}),
   ];
   // Historial: últimas semanas (para la tendencia) y temporada pasada (para las campañas)
   const P=(name,phone,lang,email,consent,ago,ss,dest,total,pax,time)=>({name,phone,lang,email,consent,ago,ss,dest,total,pax,time});
@@ -287,17 +300,19 @@ const SEED_CAMPAIGNS = () => [
   {id:'c2',at:new Date(Date.now()-40*864e5).toISOString(),name:'Gracias por repetir',segment:'Clientes que repiten',channel:'whatsapp',sent:23,result:'20 leídos · 4 reservas',example:true},
   {id:'c1',at:new Date(Date.now()-150*864e5).toISOString(),name:'Vuelve este verano',segment:'Temporada pasada',channel:'email',sent:118,result:'61 aperturas · 9 reservas',example:true},
 ];
-const DEFAULT_AUTOMATIONS = {resena:true,vuelve:true,repite:false};
+const DEFAULT_AUTOMATIONS = {resena:true};
 const isAirport = name => /Aeropuerto/.test(name||'');
 function clientsOf(bookings){
   const map={};
-  [...bookings].sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).forEach(b=>{const c=(map[b.phone]=map[b.phone]||{name:b.name,phone:b.phone,lang:b.lang,email:'',marketing:false,list:[]});
+  [...bookings].sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).forEach(b=>{const pk=phoneKey(b.phone);const c=(map[pk]=map[pk]||{name:b.name,phone:b.phone,lang:b.lang,email:'',marketing:false,list:[]});
     c.list.push(b); c.name=b.name; c.lang=b.lang; if(b.email)c.email=b.email; if(b.marketing!==undefined)c.marketing=!!b.marketing;});
   return Object.values(map).map(c=>{const ok=c.list.filter(b=>b.status!=='cancelada');const dates=ok.map(b=>b.date).sort();
     return {...c,count:ok.length,spent:ok.reduce((s,b)=>s+b.total,0),first:dates[0]||c.list[0].date,last:dates[dates.length-1]||c.list[0].date,
       airport:ok.some(b=>isAirport(b.dest)),daysSince:dates.length?Math.round((new Date(TODAY)-new Date(dates[dates.length-1]))/864e5):9999}});
 }
-const DEFAULT_SETTINGS = {nightFrom:'21:00',nightTo:'07:00',payDriver:true,seats:4,workHours:14,automations:DEFAULT_AUTOMATIONS,tarifas:DEFAULT_TARIFAS,extras:DEFAULT_EXTRAS};
+// Festivos de Cataluña (revisar cada año y añadir las fiestas locales de Santa Susanna)
+const DEFAULT_HOLIDAYS = ['2026-11-01','2026-12-06','2026-12-08','2026-12-25','2026-12-26','2027-01-01','2027-01-06','2027-03-26','2027-03-29','2027-05-01','2027-06-24','2027-08-15','2027-09-11','2027-10-12','2027-11-01','2027-12-06','2027-12-08','2027-12-25','2027-12-26'];
+const DEFAULT_SETTINGS = {nightFrom:'20:00',nightTo:'08:00',nightWeekends:true,holidays:DEFAULT_HOLIDAYS,payDriver:false,seats:4,workHours:14,automations:DEFAULT_AUTOMATIONS,tarifas:DEFAULT_TARIFAS,extras:DEFAULT_EXTRAS};
 
 /* ---------- Piezas de interfaz ---------- */
 function Chip({status}){ const s=STATUS[status]; return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[13px] font-semibold whitespace-nowrap ${s.cls}`}>{s.label}</span>; }
@@ -310,9 +325,9 @@ function Stepper({id,value,onChange,min=0,max=8,label}){
       className="grid h-11 w-11 place-items-center rounded-full text-ink disabled:opacity-30 hover:bg-sunken"><I.Plus/></button>
   </div>;
 }
-function Section({title,icon:Icn,children,aside}){
-  return <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
-    <div className="mb-3 flex items-center justify-between gap-3"><h3 className="flex items-center gap-2 text-[15px] font-bold">{Icn&&<span className="text-brandink"><Icn/></span>}{title}</h3>{aside}</div>
+function Section({title,icon:Icn,children,aside,className=''}){
+  return <section className={`min-w-0 rounded-2xl border border-line bg-surface p-4 sm:p-5 ${className}`}>
+    <div className="mb-3 flex items-center justify-between gap-3"><h2 className="flex items-center gap-2 text-[15px] font-bold">{Icn&&<span className="text-brandink"><Icn/></span>}{title}</h2>{aside}</div>
     {children}
   </section>;
 }
@@ -336,7 +351,7 @@ function Combo({id,value,onChange,options,placeholder,icon:Icn}){
   return <div ref={ref} className="relative">
     <div className="flex h-12 items-center gap-2 rounded-xl border border-line bg-surface px-3.5 focus-within:border-brand">
       <span className="text-muted">{Icn&&<Icn/>}</span>
-      <input id={id} role="combobox" aria-expanded={open} aria-controls={id+'-lista'} autoComplete="off"
+      <input id={id} role="combobox" aria-expanded={open} aria-controls={id+'-lista'} aria-autocomplete="list" aria-activedescendant={open&&list[hi]?id+'-opt-'+hi:undefined} autoComplete="off"
         className="h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted"
         placeholder={value?value.label:placeholder} value={open?q:(value?value.label:'')}
         onFocus={()=>{setOpen(true);setHi(0)}} onChange={e=>{setQ(e.target.value);setOpen(true);setHi(0)}}
@@ -347,7 +362,7 @@ function Combo({id,value,onChange,options,placeholder,icon:Icn}){
       {list.length===0&&<li className="px-4 py-3 text-muted">No encontramos ese lugar. Escríbelo en comentarios o pregúntanos por WhatsApp.</li>}
       {list.map((o,i)=>{const head=o.group!==lastGroup;lastGroup=o.group;return <React.Fragment key={o.key}>
         {head&&<li className="px-4 pb-1 pt-2 text-[12px] font-bold uppercase tracking-wider text-muted" role="presentation">{o.group}</li>}
-        <li role="option" aria-selected={i===hi} onMouseEnter={()=>setHi(i)} onMouseDown={e=>{e.preventDefault();pick(o)}}
+        <li id={id+'-opt-'+i} role="option" aria-selected={i===hi} onMouseEnter={()=>setHi(i)} onMouseDown={e=>{e.preventDefault();pick(o)}}
           className={`flex cursor-pointer items-center justify-between gap-3 px-4 py-2.5 ${i===hi?'bg-sunken':''}`}>
           <span className="min-w-0 truncate">{o.label}</span>{o.right&&<span className="shrink-0 text-[13px] font-semibold text-muted tnum">{o.right}</span>}
         </li></React.Fragment>})}
@@ -355,14 +370,26 @@ function Combo({id,value,onChange,options,placeholder,icon:Icn}){
   </div>;
 }
 
+function Notice({tone='warn',icon,title,children,action,onClick}){
+  const T={bad:'bg-badsoft text-bad',warn:'bg-warnsoft text-warn',info:'bg-infosoft text-info',ok:'bg-oksoft text-ok'}[tone];
+  const Tag=onClick?'button':'div';
+  return <Tag type={onClick?'button':undefined} onClick={onClick} role={onClick?undefined:'status'}
+    className={`flex w-full items-center gap-3 rounded-xl border border-line bg-surface p-3 text-left text-[14px] text-ink ${onClick?'transition hover:bg-sunken':''}`}>
+    <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${T}`}>{icon||<I.Alert size={18}/>}</span>
+    <span className="min-w-0 flex-1"><span className="block font-semibold leading-snug">{title}</span>{children&&<span className="mt-0.5 block text-[13px] text-muted">{children}</span>}</span>
+    {action}{onClick&&<I.Chev className="shrink-0 text-muted"/>}
+  </Tag>;
+}
+
 /* ---------- Formulario de reserva (una sola pantalla) ---------- */
 const emptyForm = () => ({from:null,to:null,date:TODAY,time:'',roundTrip:false,retDate:addDays(3),retTime:'',pax:2,luggage:{s:0,m:1,l:1},extras:{},
-  wheelFoldable:true,name:'',prefix:'+34',phone:'',email:'',flight:'',notes:'',payment:'tarjeta',terms:false,marketing:false,channel:'web'});
+  wheelFoldable:true,name:'',prefix:'+34',phone:'',email:'',flight:'',notes:'',payment:'online',terms:false,marketing:false,channel:'web'});
 
-function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings}){
-  const [f,setF]=useState(emptyForm); const [errors,setErrors]=useState({}); const [done,setDone]=useState(null);
-  const ERR_OF={from:'route',to:'route',date:'date',time:'time',retDate:'ret',retTime:'ret',pax:'pax',extras:'pax',name:'name',phone:'phone',terms:'terms'};
-  const set=(k,v)=>{setF(p=>({...p,[k]:v}));const ek=ERR_OF[k];if(ek)setErrors(e=>{if(!e[ek])return e;const n={...e};delete n[ek];return n})};
+function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefill}){
+  const [showExtras,setShowExtras]=useState(false);
+  const [f,setF]=useState(()=>({...emptyForm(),...(prefill||{})})); const [errors,setErrors]=useState({}); const [done,setDone]=useState(null); const [paying,setPaying]=useState(null);
+  const ERR_OF={from:'route',to:'route',date:'date',time:'time',retDate:'ret',retTime:'ret',pax:'pax',extras:'pax',name:'name',phone:'phone',email:'email',terms:'terms'};
+  const set=(k,v)=>{setF(p=>({...p,[k]:v,...(k==='date'&&v&&p.retDate<v?{retDate:v}:{})}));const ek=ERR_OF[k];if(ek)setErrors(e=>{if(!e[ek])return e;const n={...e};delete n[ek];return n})};
   const ssOpts=useMemo(()=>PUNTOS_SS.map(n=>({key:'ss-'+n,label:n,type:'ss',group:'Santa Susanna · recogida en tu hotel'})),[]);
   const destOpts=useMemo(()=>settings.tarifas.map(t=>({key:t.id,label:t.name,type:'dest',group:CAT_LABEL[t.cat],right:'desde '+eur(t.day)})),[settings.tarifas]);
   const HUB=/Aeropuerto|Sants|Port de|AVE|BUS/;
@@ -377,9 +404,15 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings}){
   const dest = f.from&&f.from.type==='dest'?f.from:(f.to&&f.to.type==='dest'?f.to:null);
   const dir = f.from&&f.from.type==='ss'?'out':'in';
   const maxSeats=settings.seats||4; const seats = seatsOf(f.pax,f.extras); const vehicle = vehicleFor(seats,maxSeats);
-  const clash = ss&&dest&&f.time ? conflictsOf({id:'nuevo',date:f.date,time:f.time,dest:dest.label},bookings||[],settings) : [];
-  const freeFrom = clash.length ? toHM(Math.max(...clash.map(x=>toMin(x.time)+busyMin(x.dest,settings)))) : null;
-  const q = ss&&dest ? quote({dest:dest.label,time:f.time||'12:00',retTime:f.retTime||'12:00',roundTrip:f.roundTrip,extras:f.extras,vehicle},settings) : null;
+  const lead = d => dest&&d==='in'?legMin(dest.label,settings):0;
+  const clash = ss&&dest&&f.time ? conflictsOf({id:'nuevo',date:f.date,time:f.time,dest:dest.label,dir},bookings||[],settings) : [];
+  const freeFrom = clash.length ? toHM(Math.max(...clash.map(x=>spanOf(x,settings).e))+lead(dir)) : null;
+  const retDir = dir==='out'?'in':'out';
+  const clashRet = f.roundTrip&&ss&&dest&&f.retDate&&f.retTime ? conflictsOf({id:'nuevo-v',date:f.retDate,time:f.retTime,dest:dest.label,dir:retDir},bookings||[],settings) : [];
+  const freeRet = clashRet.length ? toHM(Math.max(...clashRet.map(x=>spanOf(x,settings).e))+lead(retDir)) : null;
+  // Ida y vuelta el mismo día: la vuelta no puede empezar antes de que el taxi acabe la ida
+  const pairClash = f.roundTrip&&ss&&dest&&f.time&&f.retTime&&f.retDate===f.date && (()=>{const a=spanOf({time:f.time,dest:dest.label,dir},settings),b=spanOf({time:f.retTime,dest:dest.label,dir:retDir},settings);return a.a<b.e&&b.a<a.e})();
+  const q = ss&&dest ? quote({dest:dest.label,time:f.time||'12:00',date:f.date,retDate:f.retDate,retTime:f.retTime||'12:00',roundTrip:f.roundTrip,extras:f.extras,vehicle},settings) : null;
   const airport = dest && /Aeropuerto/.test(dest.label);
   const bigBags = f.luggage.l + f.luggage.m;
   const quick = ['Aeropuerto Barcelona-El Prat','Aeropuerto Girona-Costa Brava','Barcelona Sants','Port de Barcelona'];
@@ -387,8 +420,8 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings}){
     setF(p=>({...p,[side]:o,[other]:p[other]&&p[other].type==='dest'?null:p[other]}));
     setErrors(e=>{if(!e.route)return e;const n={...e};delete n.route;return n});
     if(!f[other]||f[other].type==='dest') setTimeout(()=>{const el=document.getElementById(other==='from'?'f-desde':'f-hasta');el&&el.focus()},0); };
-  const Chips = ({side}) => { const cur=f[side]; return <div className="flex flex-wrap items-center gap-2 pt-1"><span className="text-[13px] font-semibold text-muted">{side==='from'?'Recogidas frecuentes:':'Destinos frecuentes:'}</span>
-    {quick.map(n=>{const on=!!cur&&cur.label===n;return <button type="button" key={n} onClick={()=>setQuick(side,n)} aria-pressed={on} className={`rounded-full border px-3 py-1.5 text-[13px] font-semibold ${on?'border-brand bg-brandsoft text-brandink':'border-line hover:border-brand'}`}>{n.replace('Aeropuerto ','Aeropuerto de ').replace('-El Prat','').replace('-Costa Brava','')}</button>})}</div>; };
+  const Chips = ({side}) => { const cur=f[side]; return <div className="flex flex-wrap items-center gap-2 pb-1 pt-1"><span className="shrink-0 text-[13px] font-semibold text-muted">{side==='from'?'Frecuentes:':'Frecuentes:'}</span>
+    {quick.map(n=>{const on=!!cur&&cur.label===n;return <button type="button" key={n} onClick={()=>setQuick(side,n)} aria-pressed={on} className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-[13px] font-semibold ${on?'border-brand bg-brandsoft text-brandink':'border-line hover:border-brand'}`}>{n.replace('Aeropuerto ','Aeropuerto de ').replace('-El Prat','').replace('-Costa Brava','')}</button>})}</div>; };
 
   function submit(e){
     e.preventDefault();
@@ -396,40 +429,65 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings}){
     if(!ss||!dest) er.route='Elige desde dónde y a dónde vas.';
     if(!f.date) er.date='Elige el día.'; if(!f.time) er.time='Elige la hora de recogida.';
     if(f.date && f.date<TODAY) er.date='La fecha ya ha pasado.';
+    if(!staff&&f.date===TODAY&&f.time&&f.time<nowHM()) er.time='Esa hora ya ha pasado. Elige una hora más tarde.';
     if(f.roundTrip&&(!f.retDate||!f.retTime)) er.ret='Indica el día y la hora de vuelta.';
-    if(vehicle==='grupo') er.pax=`Nuestro taxi lleva hasta ${maxSeats} plazas. Para grupos más grandes, escríbenos por WhatsApp y te ayudamos.`;
+    else if(f.roundTrip&&f.time&&(f.retDate+f.retTime)<=(f.date+f.time)) er.ret='La vuelta tiene que ser después de la ida.';
+    else if(pairClash) er.ret='La vuelta es demasiado pronto: el taxi aún está haciendo la ida.';
+    else if(!staff&&clashRet.length) er.ret=`A esa hora de vuelta ya tenemos un viaje. Prueba a partir de las ${freeRet}.`;
+    if(vehicle==='grupo') er.pax=seats<=8?`Para ${seats} personas usamos una van de hasta 8 plazas (con suplemento). Escríbenos por WhatsApp o llama al 937 67 85 71 y te damos el precio.`:`Para más de 8 personas usamos varios vehículos. Llámanos al 937 67 85 71 y lo organizamos.`;
     if(!staff&&clash.length) er.time=`A esa hora ya tenemos un viaje. Prueba a partir de las ${freeFrom}.`;
     if(!f.name.trim()) er.name='Escribe tu nombre.';
-    if(f.phone.replace(/\D/g,'').length<6) er.phone='Escribe un teléfono válido para enviarte la confirmación.';
+    if(f.phone.replace(/\D/g,'').length<6) er.phone='Escribe un teléfono válido.';
+    if(f.email.trim()&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim())) er.email='Escribe un email válido.';
+    else if(!staff&&!f.email.trim()) er.email='Necesitamos tu email para enviarte la confirmación.';
     if(!staff&&!f.terms) er.terms='Acepta las condiciones para reservar.';
     setErrors(er); if(Object.keys(er).length){ const first=document.querySelector('[data-err="1"]'); if(first) first.scrollIntoView({behavior:'smooth',block:'center'}); return; }
-    const b={id:newCode(),createdAt:new Date().toISOString(),channel:f.channel,date:f.date,time:f.time,dir,ss:ss.label,dest:dest.label,pax:f.pax,luggage:f.luggage,
-      extras:f.extras,vehicle,flight:f.flight.trim(),name:f.name.trim(),phone:(f.prefix+' '+f.phone).trim(),email:f.email.trim(),
+    const tel=f.phone.trim(); const pre=tel.startsWith('+')?(Object.keys(LANG_BY_PREFIX).find(p=>tel.startsWith(p))||''):f.prefix;
+    const now=new Date().toISOString();
+    const b={id:newCode(),createdAt:now,channel:f.channel,date:f.date,time:f.time,dir,ss:ss.label,dest:dest.label,pax:f.pax,luggage:f.luggage,
+      extras:f.extras,vehicle,flight:f.flight.trim(),name:f.name.trim(),phone:tel.startsWith('+')?tel:(f.prefix+' '+tel).trim(),email:f.email.trim(),
       notes:[f.extras.ruedas&&!f.wheelFoldable?'Silla de ruedas NO plegable: buscar taxi con rampa.':'',f.notes.trim()].filter(Boolean).join(' '),
-      lang:'ES',marketing:f.marketing,payment:f.payment,paid:f.payment!=='conductor',status:'nueva',driverId:null,roundTrip:f.roundTrip,retDate:f.roundTrip?f.retDate:null,retTime:f.roundTrip?f.retTime:null,
-      total:q.total,night:q.out.night,log:[{at:new Date().toISOString(),text:`Reserva creada por ${CHANNEL[f.channel]}`},{at:new Date().toISOString(),text:'Confirmación enviada por WhatsApp'}]};
-    onCreate(b); setDone(b); setF(emptyForm()); setErrors({}); window.scrollTo(0,0);
+      lang:LANG_BY_PREFIX[pre]||'EN',marketing:f.marketing,payment:f.payment,
+      // Solo cuenta como pagado si lo paga el cliente en la web; si la toma el equipo, queda «a cobrar» hasta marcarlo
+      paid:!staff&&f.payment!=='conductor',status:'nueva',driverId:null,roundTrip:f.roundTrip,retDate:f.roundTrip?f.retDate:null,retTime:f.roundTrip?f.retTime:null,
+      total:q.out.price+(f.roundTrip?q.extras/2:q.extras),night:q.out.night,log:[{at:now,text:`Reserva creada por ${CHANNEL[f.channel]}`},...(f.email.trim()?[{at:now,text:'Email de reserva recibida enviado'}]:[])]};
+    const list=[b];
+    if(f.roundTrip){ const r={...b,id:newCode(),date:f.retDate,time:f.retTime,dir:retDir,roundTrip:false,retDate:null,retTime:null,isReturn:true,linked:b.id,
+      flight:'',total:q.ret.price+q.extras/2,night:q.ret.night,log:[{at:now,text:`Vuelta de la reserva ${b.id}`}]}; b.linked=r.id; list.push(r); }
+    const finish=()=>{onCreate(list); setDone({...b,grand:q.total,retId:b.linked}); setF(emptyForm()); setErrors({}); window.scrollTo(0,0);};
+    if(!staff&&f.payment==='online'){ setPaying({total:q.total,finish:m=>{list.forEach(x=>{x.paid=true;x.log.push({at:new Date().toISOString(),text:`Pagado con ${m} (pedido de WooCommerce)`})});finish();}}); window.scrollTo(0,0); return; }
+    if(staff&&f.payment==='online') list.forEach(x=>{x.paid=false;x.log.push({at:now,text:'Enlace de pago creado'})});
+    finish();
   }
 
+  if(paying) return <PayDemo total={paying.total} onPay={m=>{const p=paying;setPaying(null);p.finish(m)}} onBack={()=>setPaying(null)}/>;
   if(done) return <Confirmation b={done} onNew={()=>setDone(null)} staff={staff} onSeeInPanel={onSeeInPanel}/>;
 
   const errCount=Object.keys(errors).length;
-  return <form onSubmit={submit} noValidate className="mx-auto grid max-w-2xl gap-5 pb-28 lg:max-w-5xl lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:pb-0">
-    <div className="flex min-w-0 flex-col gap-4">
-    {errCount>0&&<div role="alert" className="flex items-center gap-3 rounded-xl bg-badsoft p-3.5 text-[14px] font-semibold text-bad"><I.Alert/>Revisa {errCount===1?'el campo marcado':`los ${errCount} campos marcados`} para completar la reserva.</div>}
-    {staff&&<div className="flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-surface p-3">
+  return <form onSubmit={submit} noValidate className="mx-auto grid max-w-2xl gap-5 pb-28 md:max-w-none lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:pb-0">
+    <div className={`grid min-w-0 content-start gap-4 ${staff?'md:grid-cols-2':''}`}>
+    {errCount>0&&<div role="alert" className={staff?'md:col-span-2':''}><Notice tone="bad" title={`Revisa ${errCount===1?'el campo marcado':`los ${errCount} campos marcados`}`}>Faltan datos para completar la reserva.</Notice></div>}
+    {staff&&<div className="flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-surface p-3 md:col-span-2">
       <span className="text-[13px] font-semibold uppercase tracking-wide text-muted">Reserva tomada por</span>
       {Object.entries(CHANNEL).map(([k,v])=><button type="button" key={k} onClick={()=>set('channel',k)} className={`rounded-full px-3 py-1.5 text-[14px] font-semibold ${f.channel===k?'bg-deep text-white':'bg-sunken text-ink'}`}>{v}</button>)}
     </div>}
 
-    <Section title="Trayecto" icon={I.Route}>
+    <Section title={staff?"Trayecto":"1. ¿A dónde vas?"} icon={I.Route}>
+      {!staff&&!q&&<div className="mb-4">
+        <h3 className="mb-2 text-[13px] font-semibold text-muted">Traslados en taxi desde Santa Susanna más reservados</h3>
+        <div className="grid grid-cols-2 gap-2">{quick.map(n=>{const t=settings.tarifas.find(x=>x.name===n);if(!t)return null;const on=f.to&&f.to.label===n;const dur=(t.info.split('·')[1]||'').trim();
+          return <button type="button" key={n} onClick={()=>setQuick('to',n)} aria-pressed={!!on} className={`rounded-xl border p-3 text-left transition ${on?'border-brand bg-brandsoft':'border-line hover:border-brand'}`}>
+            <span className="block text-[12px] font-semibold uppercase tracking-wide text-muted">Santa Susanna →</span><span className="block text-[14px] font-semibold leading-snug">{n.replace('Aeropuerto Barcelona-El Prat','Aeropuerto de Barcelona (El Prat)').replace('Aeropuerto Girona-Costa Brava','Aeropuerto de Girona')}</span>
+            <span className="mt-1 block text-[13px] text-muted">desde <b className="text-[15px] text-ink tnum">{eur(t.day)}</b></span>{dur&&<span className="block text-[12px] text-muted">{dur}</span>}</button>})}</div>
+        <p className="mt-2 text-[13px] text-muted">¿Llegas en avión o tren? Elige el aeropuerto o la estación y pulsa <span aria-hidden="true">⇅</span> para invertir el trayecto.</p>
+      </div>}
       <div className="grid gap-2" data-err={errors.route?1:0}>
         <Field label="Desde" htmlFor="f-desde"><Combo id="f-desde" value={f.from} onChange={v=>set('from',v)} options={fromOpts} placeholder="Hotel, aeropuerto, estación…" icon={I.Pin}/></Field>
-        <Chips side="from"/>
+        {staff&&<Chips side="from"/>}
         <div className="flex justify-center"><button type="button" aria-label="Intercambiar origen y destino" onClick={()=>setF(p=>({...p,from:p.to,to:p.from}))}
           className="grid h-10 w-10 place-items-center rounded-full border border-line bg-surface text-brandink hover:bg-sunken"><I.Swap/></button></div>
         <Field label="Hasta" htmlFor="f-hasta" error={errors.route}><Combo id="f-hasta" value={f.to} onChange={v=>set('to',v)} options={toOpts} placeholder="¿A dónde vas?" icon={I.Flag}/></Field>
-        <Chips side="to"/>
+        {staff&&<Chips side="to"/>}
       </div>
       {q&&<div className="mt-4 flex items-center justify-between gap-3 rounded-xl bg-brandsoft p-3.5">
         <div className="min-w-0"><div className="text-[13px] font-semibold text-brandink">Precio fijo · {q.out.night?'tarifa de noche':'tarifa de día'}{f.roundTrip?' · ida y vuelta':''}</div>
@@ -438,28 +496,33 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings}){
       </div>}
     </Section>
 
-    <Section title="Cuándo" icon={I.Cal}>
+    <Section title={staff?"Cuándo":"2. ¿Cuándo te recogemos?"} icon={I.Cal}>
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Día" htmlFor="f-dia" error={errors.date}><input id="f-dia" type="date" min={TODAY} value={f.date} onChange={e=>set('date',e.target.value)} className={inputCls} data-err={errors.date?1:0}/></Field>
-        <Field label="Hora de recogida" htmlFor="f-hora" error={errors.time} hint={f.time?(isNight(f.time,settings)?`Tarifa de noche (de ${settings.nightFrom} a ${settings.nightTo})`:'Tarifa de día'):''}>
+        <Field label="Hora de recogida" htmlFor="f-hora" error={errors.time} hint={f.time?(isHoliday(f.date,settings)?'Tarifa de fin de semana y festivos':isNight(f.time,settings,f.date)?`Tarifa de noche (de ${settings.nightFrom} a ${settings.nightTo})`:'Tarifa de día'):''}>
           <div className="flex gap-2"><input id="f-hora" type="time" value={f.time} onChange={e=>set('time',e.target.value)} className={inputCls} data-err={errors.time?1:0}/>
-          <button type="button" onClick={()=>{set('date',TODAY);set('time',nowHM())}} className="shrink-0 rounded-xl border border-line px-3.5 text-[14px] font-semibold hover:border-brand">Ahora</button></div></Field>
+          {staff&&<button type="button" onClick={()=>{set('date',TODAY);set('time',nowHM())}} className="shrink-0 rounded-xl border border-line px-3.5 text-[14px] font-semibold hover:border-brand">Ahora</button>}</div></Field>
       </div>
-      {clash.length>0&&<div role="status" className={`mt-3 flex items-start gap-3 rounded-xl p-3.5 text-[14px] ${staff?'bg-warnsoft text-warn':'bg-badsoft text-bad'}`}><I.Alert className="mt-0.5 shrink-0"/>
-        <span>{staff?<>Se solapa con {clash.map(x=>`${x.name} (${x.time})`).join(', ')}. El coche queda libre a las <b>{freeFrom}</b>.</>:<>A esa hora el taxi ya está ocupado. Queda libre a partir de las <b>{freeFrom}</b>.</>}
-        {' '}<button type="button" onClick={()=>set('time',freeFrom)} className="font-bold underline underline-offset-2">Elegir las {freeFrom}</button></span></div>}
+      {clash.length>0&&<div className="mt-3"><Notice tone={staff?'warn':'bad'} icon={<I.Clock size={18}/>}
+        title={staff?`Se solapa con ${clash.map(x=>`${x.name} (${x.time})`).join(', ')}`:'A esa hora el taxi ya está ocupado'}
+        action={<button type="button" onClick={()=>set('time',freeFrom)} className="shrink-0 rounded-full border border-line px-3 py-1.5 text-[13px] font-semibold hover:border-brand">Elegir las {freeFrom}</button>}>
+        Queda libre a partir de las {freeFrom}.</Notice></div>}
       <label className="mt-4 flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-sunken p-3.5" htmlFor="f-vuelta">
         <span className="flex items-center gap-2 font-semibold"><I.Repeat/>Ida y vuelta</span>
         <input id="f-vuelta" type="checkbox" className="peer sr-only" checked={f.roundTrip} onChange={e=>set('roundTrip',e.target.checked)}/>
-        <span className="relative h-7 w-12 rounded-full bg-line transition peer-checked:bg-brandstrong after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" aria-hidden="true"></span>
+        <span className="relative h-7 w-12 rounded-full bg-line transition peer-checked:bg-brandstrong after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5 peer-focus-visible:ring-2 peer-focus-visible:ring-brand peer-focus-visible:ring-offset-2" aria-hidden="true"></span>
       </label>
       {f.roundTrip&&<div className="mt-3 grid gap-3 sm:grid-cols-2" data-err={errors.ret?1:0}>
         <Field label="Día de vuelta" htmlFor="f-dia-v"><input id="f-dia-v" type="date" min={f.date} value={f.retDate} onChange={e=>set('retDate',e.target.value)} className={inputCls}/></Field>
         <Field label="Hora de vuelta" htmlFor="f-hora-v" error={errors.ret}><input id="f-hora-v" type="time" value={f.retTime} onChange={e=>set('retTime',e.target.value)} className={inputCls}/></Field>
       </div>}
+      {f.roundTrip&&!pairClash&&clashRet.length>0&&<div className="mt-3"><Notice tone={staff?'warn':'bad'} icon={<I.Clock size={18}/>}
+        title={staff?`La vuelta se solapa con ${clashRet.map(x=>`${x.name} (${x.time})`).join(', ')}`:'A esa hora de vuelta el taxi ya está ocupado'}
+        action={<button type="button" onClick={()=>set('retTime',freeRet)} className="shrink-0 rounded-full border border-line px-3 py-1.5 text-[13px] font-semibold hover:border-brand">Elegir las {freeRet}</button>}>
+        Queda libre a partir de las {freeRet}.</Notice></div>}
     </Section>
 
-    <Section title="Viajeros y equipaje" icon={I.Users}>
+    <Section title={staff?"Viajeros y equipaje":"3. Viajeros y equipaje"} icon={I.Users}>
       <div className="flex items-center justify-between gap-3 border-b border-line pb-3" data-err={errors.pax?1:0}>
         <div><div className="font-semibold">Pasajeros</div><div className="text-[13px] text-muted">Bebés y niños también cuentan</div></div>
         <Stepper id="f-pax" label="pasajeros" value={f.pax} min={1} max={8} onChange={v=>set('pax',v)}/>
@@ -471,13 +534,19 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings}){
       <div className={`mt-3 flex items-start gap-3 rounded-xl p-3.5 ${vehicle==='grupo'?'bg-badsoft text-bad':'bg-sunken'}`}>
         <span className="mt-0.5">{vehicle==='grupo'?<I.Alert/>:<I.Car/>}</span>
         <div className="text-[14px]">{vehicle==='taxi'&&<><b>Taxi</b> · hasta {maxSeats} plazas{f.extras.golf?` (las bolsas de golf ocupan plaza: vais ${seats})`:''}.{bigBags>4&&<> Con tanto equipaje grande, indícalo en comentarios para confirmar que cabe.</>}</>}
-          {vehicle==='grupo'&&<><b>Sois {seats} plazas y el taxi lleva {maxSeats}.</b> Escríbenos por WhatsApp y te ayudamos a organizarlo.</>}
+          {vehicle==='grupo'&&<>{seats<=8?<><b>Sois {seats}: os llevamos en una van de hasta 8 plazas.</b> Tiene suplemento: escríbenos por WhatsApp o llama al 937 67 85 71 y te damos el precio.</>:<><b>Sois {seats}: hacen falta varios vehículos.</b> Llámanos al 937 67 85 71 y lo organizamos.</>}</>}
           {errors.pax&&vehicle!=='grupo'&&<div className="font-semibold text-bad">{errors.pax}</div>}</div>
       </div>
     </Section>
 
-    <Section title="Necesidades especiales" icon={I.Wheel} aside={<span className="text-[13px] text-muted">Opcional</span>}>
-      <div className="grid gap-2 sm:grid-cols-2">
+    <Section title={staff?"Necesidades especiales":"4. ¿Necesitas algo más?"} icon={I.Wheel} aside={<span className="text-[13px] text-muted">Opcional</span>}>
+      {(()=>{const chosen=settings.extras.filter(e=>f.extras[e.id]);return !showExtras&&<div className="flex flex-col gap-3">
+        {chosen.length>0?<div className="flex flex-wrap gap-2">{chosen.map(e=><span key={e.id} className="rounded-full bg-brandsoft px-3 py-1 text-[13px] font-semibold text-brandink">{f.extras[e.id]}× {e.name}</span>)}</div>
+          :<p className="text-[14px] text-muted">Sillita o elevador infantil, carrito, silla de ruedas, bicicleta, bolsa de golf, mascota o una parada adicional.</p>}
+        <button type="button" onClick={()=>setShowExtras(true)} aria-expanded="false" className="flex h-11 items-center justify-center gap-2 rounded-xl border border-dashed border-line font-semibold text-brandink hover:border-brand"><I.Plus/>{chosen.length?'Cambiar necesidades':'Añadir necesidades'}</button>
+      </div>})()}
+      {showExtras&&<>
+      <div className="grid gap-2">
         {settings.extras.map(e=>{const C=I[e.icon]||I.Plus;const v=f.extras[e.id]||0;return <div key={e.id} className={`flex min-w-0 items-center justify-between gap-3 rounded-xl border p-3 ${v?'border-brand bg-brandsoft':'border-line'}`}>
           <div className="flex min-w-0 items-center gap-3"><span className="text-brandink"><C/></span><div className="min-w-0"><div className="font-semibold">{e.name}</div>
             <div className="text-[13px] text-muted">{e.price?`${eur(e.price)} · `:'Gratis · '}{e.hint}</div></div></div>
@@ -487,38 +556,40 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings}){
       {f.extras.ruedas>0&&<div className="mt-3 flex flex-wrap items-center gap-3 rounded-xl bg-sunken p-3.5 text-[14px]">
         <span className="font-semibold">¿La silla de ruedas es plegable?</span>
         {[true,false].map(v=><button type="button" key={String(v)} onClick={()=>set('wheelFoldable',v)} className={`rounded-full px-3 py-1.5 font-semibold ${f.wheelFoldable===v?'bg-deep text-white':'bg-surface border border-line'}`}>{v?'Sí':'No'}</button>)}
-        {!f.wheelFoldable&&<span className="w-full text-warn">Buscaremos un taxi con rampa. Te confirmamos la disponibilidad por WhatsApp.</span>}
+        {!f.wheelFoldable&&<span className="w-full text-warn">Buscaremos un taxi con rampa y te confirmaremos la disponibilidad.</span>}
       </div>}
+      <button type="button" onClick={()=>setShowExtras(false)} aria-expanded="true" className="mt-3 w-full text-center text-[14px] font-semibold text-muted underline underline-offset-2 hover:text-ink">Listo</button>
+      </>}
       {f.extras.parada>0&&<p className="mt-3 text-[14px] text-muted">Indica en comentarios dónde es la parada adicional.</p>}
     </Section>
 
-    <Section title="Tus datos" icon={I.Contacts}>
-      <div className="grid gap-3">
+    <Section title={staff?"Tus datos":"5. Tus datos"} icon={I.Contacts} className={staff?'md:col-span-2':''}>
+      <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Nombre y apellidos" htmlFor="f-nombre" error={errors.name}><input id="f-nombre" autoComplete="name" value={f.name} onChange={e=>set('name',e.target.value)} className={inputCls} data-err={errors.name?1:0}/></Field>
-        <Field label="Teléfono (WhatsApp)" htmlFor="f-tel" error={errors.phone} hint="Te enviamos aquí la confirmación y el aviso de llegada">
+        <Field label="Teléfono (WhatsApp)" htmlFor="f-tel" error={errors.phone} hint="Por si tenemos que avisarte el día del viaje">
           <div className="flex gap-2"><select id="f-prefijo" aria-label="Prefijo" value={f.prefix} onChange={e=>set('prefix',e.target.value)} className="h-12 rounded-xl border border-line bg-surface px-2">
-            {['+34','+44','+33','+49','+31','+39','+351','+46','+48','+1'].map(p=><option key={p}>{p}</option>)}</select>
+            {['+34','+44','+33','+49','+31','+32','+39','+351','+353','+41','+43','+45','+46','+47','+48','+420','+1'].map(p=><option key={p}>{p}</option>)}</select>
           <input id="f-tel" type="tel" autoComplete="tel-national" inputMode="tel" value={f.phone} onChange={e=>set('phone',e.target.value)} className={inputCls} data-err={errors.phone?1:0}/></div></Field>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Email" htmlFor="f-email" hint="Opcional, para la factura"><input id="f-email" type="email" autoComplete="email" value={f.email} onChange={e=>set('email',e.target.value)} className={inputCls}/></Field>
-          {airport&&<Field label="Número de vuelo" htmlFor="f-vuelo" hint="Seguimos tu vuelo por si se retrasa"><input id="f-vuelo" value={f.flight} onChange={e=>set('flight',e.target.value.toUpperCase())} placeholder="VY 1234" className={inputCls}/></Field>}
+        <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
+          <Field label="Email" htmlFor="f-email" error={errors.email} hint={staff?'Opcional: si lo tiene, le llega la confirmación':'Te enviamos aquí la confirmación'}><input id="f-email" type="email" autoComplete="email" value={f.email} onChange={e=>set('email',e.target.value)} className={inputCls} data-err={errors.email?1:0}/></Field>
+          {airport&&<Field label="Número de vuelo" htmlFor="f-vuelo" hint="Seguimos tu vuelo y te esperamos en llegadas con un cartel con tu nombre"><input id="f-vuelo" value={f.flight} onChange={e=>set('flight',e.target.value.toUpperCase())} placeholder="VY 1234" className={inputCls}/></Field>}
         </div>
-        <Field label="Comentarios" htmlFor="f-notas"><textarea id="f-notas" rows={3} value={f.notes} onChange={e=>set('notes',e.target.value)} className="w-full rounded-xl border border-line bg-surface p-3.5 outline-none focus:border-brand" placeholder="Número de habitación, parada adicional, algo que debamos saber…"/></Field>
+        <div className="sm:col-span-2"><Field label="Comentarios" htmlFor="f-notas"><textarea id="f-notas" rows={2} value={f.notes} onChange={e=>set('notes',e.target.value)} className="w-full rounded-xl border border-line bg-surface p-3.5 outline-none focus:border-brand" placeholder="Número de habitación, parada adicional, algo que debamos saber…"/></Field></div>
       </div>
     </Section>
 
-    <Section title="Pago" icon={I.Wallet}>
-      <div className="grid gap-2 sm:grid-cols-3">
-        {[['tarjeta','Tarjeta',I.Card],['paypal','PayPal',I.Wallet],...(settings.payDriver?[['conductor','En el coche',I.Cash]]:[])].map(([k,l,C])=>
-          <label key={k} htmlFor={'f-pago-'+k} className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3.5 font-semibold ${f.payment===k?'border-brand bg-brandsoft':'border-line'}`}>
-            <input id={'f-pago-'+k} type="radio" name="pago" className="sr-only" checked={f.payment===k} onChange={()=>set('payment',k)}/><C/>{l}</label>)}
+    <Section title={staff?"Pago":"6. Pago seguro"} icon={I.Lock} className={staff?'md:col-span-2':''}>
+      <div className="flex items-start gap-3 rounded-xl border border-brand bg-brandsoft p-3.5">
+        <span className="mt-0.5 text-brandink"><I.Card/></span>
+        <div className="min-w-0 text-[14px]">{staff?<><b className="block text-[15px]">Se paga por adelantado con enlace</b><span className="text-muted">Al guardar, tendrás el enlace de pago para mandárselo por WhatsApp.</span></>
+          :<><b className="block text-[15px]">Se paga al reservar{q?`: ${eur(q.total)}`:''}</b><span className="text-muted">Tarjeta (Redsys), Bizum o PayPal. En el siguiente paso eliges cómo, en una página de pago segura.</span></>}</div>
       </div>
       {!staff&&<label htmlFor="f-cond" className="mt-4 flex items-start gap-3 text-[14px]" data-err={errors.terms?1:0}>
         <input id="f-cond" type="checkbox" checked={f.terms} onChange={e=>set('terms',e.target.checked)} className="mt-1 h-5 w-5 accent-[var(--brand-strong)]"/>
         <span>He leído y acepto las condiciones del servicio y la política de privacidad.{errors.terms&&<span className="block font-semibold text-bad">{errors.terms}</span>}</span></label>}
       <label htmlFor="f-ofertas" className={`${staff?'mt-4':'mt-3'} flex items-start gap-3 text-[14px]`}>
         <input id="f-ofertas" type="checkbox" checked={f.marketing} onChange={e=>set('marketing',e.target.checked)} className="mt-1 h-5 w-5 accent-[var(--brand-strong)]"/>
-        <span>{staff?'El cliente acepta recibir ofertas por email o WhatsApp':'Quiero recibir ofertas y descuentos por email o WhatsApp'} <span className="text-muted">(opcional, puedes darte de baja cuando quieras)</span></span></label>
+        <span>{staff?'El cliente acepta recibir ofertas por email':'Quiero recibir ofertas y descuentos por email'} <span className="text-muted">(opcional, puedes darte de baja cuando quieras)</span></span></label>
     </Section>
     </div>
 
@@ -541,8 +612,8 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings}){
             ['Pago',PAY[f.payment]],
           ].map(([k,v])=><div key={k} className="flex justify-between gap-3 py-2.5"><dt className="text-muted">{k}</dt><dd className={`text-right font-semibold tnum ${v==='Falta la hora'?'text-warn':''}`}>{v}</dd></div>)}
         </dl>
-        <div className="p-5 pt-2"><button type="submit" className="h-12 w-full rounded-full bg-brandstrong font-bold text-white hover:opacity-90">{q?`Reservar · ${eur(q.total)}`:'Reservar'}</button>
-          <p className="mt-2 text-center text-[13px] text-muted">Confirmación inmediata por WhatsApp</p></div>
+        <div className="p-5 pt-2"><button type="submit" className="h-12 w-full rounded-full bg-brandstrong font-bold text-white hover:opacity-90">{q?(staff?`Reservar · ${eur(q.total)}`:f.payment==='online'?`Reservar y pagar ${eur(q.total)}`:`Reservar · ${eur(q.total)}`):'Reservar'}</button>
+          <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-[13px] text-muted">{!staff&&f.payment==='online'&&<I.Lock size={14}/>}{staff?'Se guarda como «Por confirmar»':(f.payment==='online'?'Pago seguro con tarjeta, Bizum o PayPal':'Te enviamos la confirmación por email')}</p></div>
       </div>
     </aside>
 
@@ -557,14 +628,40 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings}){
 }
 
 function WaPreview({b}){
-  const d=DRIVERS.find(x=>x.id===b.driverId);
-  const msgs=[{t:'Reserva recibida',x:`${dayLabel(b.date)} a las ${b.time} · ${tripName(b)} · ${eur(b.total)} · Código ${b.id}. Te confirmamos en breve.`}];
-  if(['asignada','en_camino','completada'].includes(b.status)) msgs.push({t:'Reserva confirmada',x:`Te recogemos ${dayLabel(b.date).toLowerCase()} a las ${b.time}. Tu taxi: ${d?d.car+' · '+d.plate:'Taxi Santa Susanna'}.`});
-  if(b.status==='en_camino') msgs.push({t:'Tu taxi está en camino',x:'Llega en unos minutos a la recogida.'});
-  return <div className="rounded-2xl bg-[#EFE7DD] p-3 dark:bg-sunken" aria-label="Mensajes de WhatsApp al cliente">
-    <div className="mb-2 text-[12px] font-bold uppercase tracking-wider text-[#4B5A51] dark:text-muted">WhatsApp del cliente</div>
-    <div className="flex flex-col gap-2">{msgs.map((m,i)=><div key={i} className="max-w-[92%] rounded-xl border-l-4 border-brand bg-white px-3 py-2 text-[14px] text-[#16221B] shadow-sm dark:bg-surface dark:text-ink">
-      <div className="font-bold text-[#00854A] dark:text-brandink">{m.t}</div>{m.x}</div>)}</div>
+  const msgs=[{t:'Hemos recibido tu reserva',x:`${dayLabel(b.date)} a las ${b.time} · ${tripName(b)} · ${eur(b.grand||b.total)} · Código ${b.id}.${b.paid&&b.payment!=='conductor'?' Pago recibido.':''} Te confirmamos en breve.`}];
+  if(['asignada','en_camino','completada'].includes(b.status)) msgs.push({t:'Reserva confirmada',x:`Te recogemos ${dayLabel(b.date).toLowerCase()} a las ${b.time}. Si necesitas cambiar algo, responde a este email.`});
+  if(b.status==='cancelada') msgs.push({t:'Reserva cancelada',x:'Tu reserva ha sido cancelada. Si no lo esperabas, responde a este email o llámanos.'});
+  if(!b.email) return <div className="rounded-2xl border border-dashed border-line p-3 text-[14px] text-muted">Sin email: los avisos se le dan por WhatsApp o teléfono.</div>;
+  return <div className="rounded-2xl bg-sunken p-3" aria-label="Emails al cliente">
+    <div className="mb-2 flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-muted"><I.Mail size={14}/>Emails automáticos a {b.email}</div>
+    <div className="flex flex-col gap-2">{msgs.map((m,i)=><div key={i} className="rounded-xl border border-line bg-surface px-3 py-2 text-[14px]">
+      <div className="font-bold text-brandink">{m.t}</div>{m.x}</div>)}</div>
+  </div>;
+}
+
+function PayDemo({total,onPay,onBack}){
+  return <div className="mx-auto flex max-w-md flex-col gap-4">
+    <div className="rounded-2xl border border-line bg-surface p-6 text-center">
+      <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-brandsoft text-brandink"><I.Card/></div>
+      <h2 className="text-[20px] font-extrabold">Pago seguro</h2>
+      <p className="mt-1 text-[14px] text-muted">En la web real, aquí se abre la página de pago de WooCommerce con las formas de pago que ya tiene activas.</p>
+      <div className="mt-4 text-[32px] font-extrabold tnum">{eur(total)}</div>
+      <div className="mt-4 grid gap-2">{['Tarjeta (Redsys)','Bizum','PayPal'].map(m=><button key={m} type="button" onClick={()=>onPay(m)} className="h-12 rounded-xl border border-line font-semibold hover:border-brand">{m}</button>)}</div>
+      <p className="mt-3 text-[13px] text-muted">Demostración: no se cobra nada.</p>
+    </div>
+    <button type="button" onClick={onBack} className="text-[14px] font-semibold text-muted underline underline-offset-2">Volver al formulario</button>
+  </div>;
+}
+
+function PayLinkBox({b}){
+  const [shown,setShown]=useState(false);
+  const url=`taxisantasusanna.com/pagar/${b.id}`;
+  return <div className="rounded-2xl border border-line bg-surface p-4">
+    <h3 className="font-bold">Enlace de pago</h3>
+    <p className="mt-1 break-all text-[14px] text-muted">{url}</p>
+    <button type="button" onClick={()=>setShown(true)} className="mt-3 flex h-10 items-center gap-2 rounded-full bg-brandstrong px-4 text-[14px] font-semibold text-white"><I.Msg size={16}/>Enviar por WhatsApp</button>
+    {shown&&<div className="mt-3 rounded-xl bg-sunken p-3 text-[14px]"><div className="mb-1 text-[12px] font-bold uppercase tracking-wider text-muted">Se abre WhatsApp con este mensaje</div>Hola {b.name.split(' ')[0]}, aquí tienes el enlace para pagar tu taxi ({b.id}, {eur(b.grand||b.total)}): {url}</div>}
+    <p className="mt-2 text-[13px] text-muted">Cuando paga, la reserva se marca como pagada sola.</p>
   </div>;
 }
 
@@ -572,14 +669,15 @@ function Confirmation({b,onNew,staff,onSeeInPanel}){
   return <div className="mx-auto flex max-w-xl flex-col gap-4">
     <div className="rounded-2xl border border-line bg-surface p-6 text-center">
       <div className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-full bg-oksoft text-ok"><I.CheckC size={30}/></div>
-      <h2 className="text-[22px] font-extrabold">Reserva confirmada</h2>
-      <p className="mt-1 text-muted">Código <b className="text-ink tnum">{b.id}</b> · te hemos enviado la confirmación por WhatsApp.</p>
+      <h2 className="text-[22px] font-extrabold">{staff?'Reserva apuntada':'Reserva recibida'}</h2>
+      <p className="mt-1 text-muted">Código <b className="text-ink tnum">{b.id}</b>{b.retId&&<> y <b className="text-ink tnum">{b.retId}</b> (vuelta)</>} · {staff?'queda «Por confirmar» en el panel.':'te hemos enviado la confirmación por email.'}</p>
       <div className="mt-5 grid gap-2 text-left text-[14px]">
-        {[['Trayecto',tripName(b)],['Recogida',`${dayLabel(b.date)} a las ${b.time}`],...(b.roundTrip?[['Vuelta',`${dayLabel(b.retDate)} a las ${b.retTime}`]]:[]),['Pasajeros',b.pax],['Pago',PAY[b.payment]],['Total',eur(b.total)]].map(([k,v])=>
+        {[['Trayecto',tripName(b)],['Recogida',`${dayLabel(b.date)} a las ${b.time}`],...(b.roundTrip?[['Vuelta',`${dayLabel(b.retDate)} a las ${b.retTime}`]]:[]),['Pasajeros',b.pax],['Pago',PAY[b.payment]],['Total',eur(b.grand||b.total)]].map(([k,v])=>
           <div key={k} className="flex justify-between gap-3 border-b border-line py-2"><span className="text-muted">{k}</span><span className="text-right font-semibold">{v}</span></div>)}
       </div>
     </div>
     <WaPreview b={b}/>
+    {staff&&b.payment==='online'&&!b.paid&&<PayLinkBox b={b}/>}
     {!onSeeInPanel&&!staff&&VISTA&&<div className="rounded-2xl border-2 border-dashed border-brand bg-brandsoft p-4 text-[14px]"><b>Mira el panel:</b> esta reserva ya ha entrado como «Por confirmar».</div>}
     {onSeeInPanel&&<div className="flex flex-col gap-3 rounded-2xl border-2 border-dashed border-brand bg-brandsoft p-4 sm:flex-row sm:items-center"><p className="flex-1 text-[14px]"><b>Demostración:</b> esta reserva ya ha entrado en el panel del propietario como «Por confirmar».</p><button onClick={()=>onSeeInPanel(b.id)} className="flex h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-deep px-5 font-bold text-white">Verla en el panel<I.ArrowR/></button></div>}
     <button onClick={onNew} className="h-12 rounded-full border border-line bg-surface font-bold hover:border-brand">{staff?'Tomar otra reserva':'Hacer otra reserva'}</button>
@@ -596,11 +694,11 @@ function TrendChart({bookings}){
   const [hover,setHover]=useState(null); const h=hover!==null?data[hover]:null;
   return <div className="rounded-2xl border border-line bg-surface p-4">
     <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-      <div><h3 className="font-bold">Reservas de los últimos 14 días</h3>
+      <div><h2 className="font-bold">Reservas de los últimos 14 días</h2>
         <p className="text-[13px] text-muted">{h?`${new Date(h.d+'T12:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'short'})}: ${h.n} reserva${h.n===1?'':'s'} · ${eur(h.eur)}`:'Pasa por encima de una barra para ver el detalle'}</p></div>
       <div className="text-right"><div className="text-[13px] text-muted">Últimos 7 días</div><div className="text-[20px] font-extrabold tnum">{thisW} <span className={`text-[13px] font-bold ${diff>=0?'text-ok':'text-bad'}`}>{diff>=0?'+':''}{diff} % vs. semana anterior</span></div></div>
     </div>
-    <div className="flex h-32 items-end gap-1.5" role="img" aria-label={`Tendencia: ${data.map(x=>x.n).join(', ')} reservas por día`}>
+    <div className="flex h-32 items-end gap-1.5" role="group" aria-label="Reservas por día de los últimos 14 días">
       {data.map((x,i)=><button key={x.d} type="button" onMouseEnter={()=>setHover(i)} onMouseLeave={()=>setHover(null)} onFocus={()=>setHover(i)} onBlur={()=>setHover(null)}
         aria-label={`${dayLabel(x.d)}: ${x.n} reservas`} className="group flex h-full min-w-0 flex-1 flex-col justify-end">
         <span className={`block w-full rounded-t-md transition ${x.d===TODAY?'bg-gold':i>=7?'bg-brand':'bg-line'} ${hover===i?'opacity-80':''}`} style={{height:`${Math.max(4,x.n/max*100)}%`}}></span></button>)}
@@ -608,38 +706,43 @@ function TrendChart({bookings}){
     <div className="mt-1.5 flex gap-1.5 text-[12px] text-muted tnum">{data.map(x=><span key={x.d} className="min-w-0 flex-1 text-center">{x.d===TODAY?'Hoy':new Date(x.d+'T12:00').getDate()}</span>)}</div>
   </div>;
 }
-function Today({bookings,open,assign,settings}){
+function Today({bookings,open,assign,settings,onStatus}){
   const today=bookings.filter(b=>b.date===TODAY&&b.status!=='cancelada').sort((a,b)=>a.time.localeCompare(b.time));
   const pending=bookings.filter(b=>b.status==='nueva'&&b.date>=TODAY).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
   const income=today.reduce((s,b)=>s+b.total,0);
   const toCollect=today.filter(b=>!b.paid).reduce((s,b)=>s+b.total,0);
   const now=nowHM();
+  const unpaid=bookings.filter(b=>!b.paid&&b.date>=TODAY&&b.status!=='cancelada'&&b.status!=='completada');
   const alerts=today.filter(b=>b.status!=='completada'&&(b.status==='nueva'||b.flightNote)).map(b=>({b,
     text:[b.status==='nueva'?(b.time<now?`Sin confirmar y la recogida era a las ${b.time}`:`Sin confirmar · recogida a las ${b.time} (${untilLabel(b.time)})`):null,b.flightNote].filter(Boolean).join(' · '),
     tone:b.status==='nueva'?'warn':'info'}));
-  const nextB=today.find(b=>b.time>=now&&b.status!=='completada');
+  // La siguiente: la que está en camino o la primera pendiente desde hace 30 min (por si va con retraso)
+  const nextB=today.find(b=>b.status==='en_camino')||today.find(b=>b.status!=='completada'&&toMin(b.time)>=toMin(now)-30);
+  const upcoming=bookings.filter(b=>b.date>TODAY&&b.status!=='cancelada'&&b.status!=='pago_pendiente').sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))[0];
   const clashes=today.filter(b=>b.status!=='completada').map(b=>({b,c:conflictsOf(b,today,settings)})).filter(x=>x.c.length&&x.c.every(c=>c.time>=x.b.time));
+  unpaid.forEach(b=>alerts.push({b,text:`Sin pagar · ${dayLabel(b.date)} ${b.time}: envíale el enlace de pago`,tone:'warn'}));
   clashes.forEach(({b,c})=>alerts.unshift({b,text:`Se solapa con la recogida de las ${c.map(x=>x.time).join(' y ')}: el taxi no llega a las dos`,tone:'bad'}));
   const busy=today.reduce((s,b)=>s+busyMin(b.dest,settings),0); const hours=settings.workHours||14; const occ=Math.min(100,Math.round(busy/(hours*60)*100));
   const tiles=[{k:'Viajes hoy',v:today.length,s:`${today.filter(b=>b.status==='completada').length} completados`},{k:'Por confirmar',v:pending.length,s:'de hoy en adelante',tone:pending.length?'text-warn':''},
-    {k:'Facturación de hoy',v:eur(income),s:`${eur(toCollect)} a cobrar en el coche`},{k:'Taxi ocupado hoy',v:`${occ} %`,s:`${hrs(busy)} h de ${hours} h de trabajo`,bar:occ}];
+    {k:'Facturación de hoy',v:eur(income),s:toCollect?`${eur(toCollect)} pendiente de pago`:'Todo pagado'},{k:'Taxi ocupado hoy',v:`${occ} %`,s:`${hrs(busy)} h de ${hours} h de trabajo`,bar:occ}];
   return <div className="flex flex-col gap-5">
+    {onStatus&&(nextB?<NextCard b={nextB} settings={settings} onStatus={onStatus} open={open}/>:<NoNextCard up={upcoming} open={open}/>)}
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{tiles.map(t=><div key={t.k} className="min-w-0 rounded-2xl border border-line bg-surface p-4">
       <div className="text-[13px] font-semibold text-muted">{t.k}</div><div className={`mt-1 text-[26px] font-extrabold tnum ${t.tone||''}`}>{t.v}</div><div className="text-[13px] text-muted">{t.s}</div>
       {t.bar!==undefined&&<div className="mt-2 h-2 overflow-hidden rounded-full bg-sunken" role="img" aria-label={`Ocupación ${t.bar} %`}><div className="h-full rounded-full bg-brand" style={{width:t.bar+'%'}}></div></div>}</div>)}</div>
     <TrendChart bookings={bookings}/>
-    {alerts.length>0&&<div className="flex flex-col gap-2">{alerts.map((a,i)=><button key={i} onClick={()=>open(a.b.id)} className={`flex items-center gap-3 rounded-xl p-3.5 text-left text-[14px] ${a.tone==='bad'?'bg-badsoft text-bad':a.tone==='warn'?'bg-warnsoft text-warn':'bg-infosoft text-info'}`}>
-      <span className="shrink-0">{a.tone==='info'?<I.Plane/>:<I.Alert/>}</span><span className="min-w-0 flex-1"><b>{a.text}</b><span className="block truncate opacity-90">{a.b.name} · {tripName(a.b)}</span></span><I.Chev/></button>)}</div>}
+    {alerts.length>0&&<div className="flex flex-col gap-2">{alerts.map((a,i)=><Notice key={i} tone={a.tone} onClick={()=>open(a.b.id)}
+      icon={a.tone==='info'?<I.Plane size={18}/>:a.tone==='bad'?<I.Alert size={18}/>:<I.Clock size={18}/>} title={a.text}><span className="block truncate">{a.b.name} · {tripName(a.b)}</span></Notice>)}</div>}
     <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
       <div className="min-w-0 rounded-2xl border border-line bg-surface">
-        <div className="flex items-center justify-between border-b border-line p-4"><h3 className="font-bold">Recogidas de hoy</h3><span className="text-[13px] text-muted">{dayLabel(TODAY)}</span></div>
-        <ol className="divide-y divide-line">{today.map(b=>{const d=DRIVERS.find(x=>x.id===b.driverId);const isNext=nextB&&b.id===nextB.id;const past=b.status==='completada';return <li key={b.id} className={isNext?'bg-brandsoft':''}><button onClick={()=>open(b.id)} className={`flex w-full items-center gap-3 p-4 text-left ${isNext?'':'hover:bg-sunken'} ${past?'opacity-60':''}`}>
+        <div className="flex items-center justify-between border-b border-line p-4"><h2 className="font-bold">Recogidas de hoy</h2><span className="text-[13px] text-muted">{dayLabel(TODAY)}</span></div>
+        <ol className="divide-y divide-line">{today.map(b=>{const d=DRIVERS.find(x=>x.id===b.driverId);const isNext=nextB&&b.id===nextB.id;const past=b.status==='completada';return <li key={b.id} className={isNext?'bg-brandsoft':''}><button onClick={()=>open(b.id)} className={`flex w-full items-center gap-3 p-4 text-left ${isNext?'':'hover:bg-sunken'} ${past?'bg-sunken':''}`}>
           <span className="w-14 shrink-0"><span className="block text-[17px] font-extrabold tnum">{b.time}</span>{isNext&&<span className="block text-[12px] font-bold text-brandink">{untilLabel(b.time)}</span>}</span>
-          <span className="min-w-0 flex-1">{isNext&&<span className="mb-0.5 block text-[12px] font-bold uppercase tracking-wider text-brandink">Siguiente recogida</span>}<span className="block truncate font-semibold">{tripName(b)}</span><span className="block truncate text-[13px] text-muted">{b.name} · {b.pax} pax · hasta las {toHM(toMin(b.time)+busyMin(b.dest,settings))}</span></span>
+          <span className="min-w-0 flex-1">{isNext&&<span className="mb-0.5 block text-[12px] font-bold uppercase tracking-wider text-brandink">Siguiente recogida</span>}<span className="block truncate font-semibold">{tripName(b)}</span><span className="block truncate text-[13px] text-muted">{b.name} · {b.pax} pax · {b.dir==='in'?`sale a las ${toHM(spanOf(b,settings).a)} · `:''}libre a las {toHM(spanOf(b,settings).e)}</span></span>
           <Chip status={b.status}/></button></li>})}</ol>
       </div>
       <div className="min-w-0 rounded-2xl border border-line bg-surface">
-        <div className="border-b border-line p-4"><h3 className="font-bold">Por confirmar</h3></div>
+        <div className="border-b border-line p-4"><h2 className="font-bold">Por confirmar</h2></div>
         {pending.length===0?<p className="p-4 text-muted">Todo confirmado. Las reservas nuevas aparecerán aquí.</p>:
         <ul className="divide-y divide-line">{pending.slice(0,6).map(b=><li key={b.id} className="flex flex-col gap-2 p-4">
           <button onClick={()=>open(b.id)} className="text-left"><span className="text-[13px] font-semibold text-muted">{dayLabel(b.date)} · {b.time} · {b.pax} pax</span><span className="block font-semibold">{tripName(b)}</span></button>
@@ -663,23 +766,127 @@ function QuickAction({b,bookings,update,assign,small}){
   if(b.status==='en_camino') return <button onClick={stop(()=>update(b.id,{status:'completada'},'Marcada completada'))} className={`${cls} border border-line bg-surface hover:border-brand`}>Completar</button>;
   return null;
 }
-function Bookings({bookings,open,update,assign}){
+const BLOCK={nueva:'border-warn bg-warnsoft',asignada:'border-brand bg-brandsoft',en_camino:'border-info bg-infosoft',completada:'border-line bg-sunken',cancelada:'border-bad bg-badsoft'};
+const WD=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const mondayOf = iso => { const d=new Date(iso+'T12:00'); d.setDate(d.getDate()-((d.getDay()+6)%7)); return isoDay(d); };
+const shiftDay = (iso,n) => { const d=new Date(iso+'T12:00'); d.setDate(d.getDate()+n); return isoDay(d); };
+
+function WeekView({items,open,settings,start,setStart,bookings,onSlot,pickDay,n=7}){
+  // n=7: semana (ordenador) · n=3: tres días (móvil, columnas legibles sin scroll lateral)
+  const days=Array.from({length:n},(_,i)=>shiftDay(start,i));
+  const H0=6,H1=24,PX=48; const nowM=toMin(nowHM());
+  const end=shiftDay(start,n-1); const fmt=iso=>new Date(iso+'T12:00').toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+  const scroller=useRef(null);
+  useEffect(()=>{if(scroller.current) scroller.current.scrollTop=Math.max(0,(Math.min(nowM,20*60)-H0*60-60)*PX/60)},[start]);
+  return <div className="rounded-2xl border border-line bg-surface">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line p-3">
+      <div className="flex items-center gap-2">
+        <button onClick={()=>setStart(shiftDay(start,-n))} aria-label={n===7?"Semana anterior":"Días anteriores"} className="grid h-9 w-9 place-items-center rounded-full border border-line hover:border-brand"><I.Back size={16}/></button>
+        <button onClick={()=>setStart(n===7?mondayOf(TODAY):TODAY)} className="h-9 rounded-full border border-line px-3 text-[14px] font-semibold hover:border-brand">{n===7?"Esta semana":"Hoy"}</button>
+        <button onClick={()=>setStart(shiftDay(start,n))} aria-label={n===7?"Semana siguiente":"Días siguientes"} className="grid h-9 w-9 place-items-center rounded-full border border-line hover:border-brand"><I.Chev size={16}/></button>
+      </div>
+      <div className="font-bold tnum">{fmt(start)} – {fmt(end)}</div>
+    </div>
+    <div ref={scroller} className="max-h-[620px] overflow-auto">
+      <div className={n===7?"min-w-[760px]":""}>
+        <div className="sticky top-0 z-10 grid border-b border-line bg-surface" style={{gridTemplateColumns:`52px repeat(${n},minmax(0,1fr))`}}>
+          <span></span>
+          {days.map((d,i)=>{const n=items.filter(b=>b.date===d&&b.status!=='cancelada').length;const isT=d===TODAY;return <div key={d} role={pickDay?'button':undefined} tabIndex={pickDay?0:undefined} onClick={()=>pickDay&&pickDay(d)} onKeyDown={e=>{if(pickDay&&e.key==='Enter')pickDay(d)}} title={pickDay?'Ver el día':undefined} className={`px-2 py-2 text-center ${pickDay?'cursor-pointer hover:bg-sunken':''} ${isT?'text-brandink':''}`}>
+            <div className="text-[12px] font-bold uppercase tracking-wider text-muted">{WD[(new Date(d+'T12:00').getDay()+6)%7]}</div>
+            <div className={`mx-auto mt-0.5 grid h-8 w-8 place-items-center rounded-full text-[15px] font-extrabold tnum ${isT?'bg-brandstrong text-white':''}`}>{new Date(d+'T12:00').getDate()}</div>
+            <div className="text-[12px] text-muted tnum">{n?`${n} viaje${n>1?'s':''}`:'libre'}</div></div>})}
+        </div>
+        <div className="relative grid" style={{height:(H1-H0)*PX,gridTemplateColumns:`52px repeat(${n},minmax(0,1fr))`}}>
+          <div className="relative">{Array.from({length:H1-H0},(_,h)=><span key={h} className="absolute right-2 -translate-y-1/2 text-[12px] text-muted tnum" style={{top:h*PX}}>{h?pad(H0+h)+':00':''}</span>)}</div>
+          {days.map(d=>{
+            const list=items.filter(b=>b.date===d&&b.status!=='cancelada');
+            // Columnas solo dentro de cada grupo de viajes que se solapan; el resto ocupa todo el ancho
+            const placed=[]; let group=[], lanes=[], gEnd=-1;
+            const flush=()=>{group.forEach(x=>x.n=lanes.length||1); group=[]; lanes=[];};
+            list.map(b=>({b,...spanOf(b,settings)})).sort((x,y)=>x.a-y.a).forEach(({b,a:s,e})=>{ if(s>=gEnd) flush();
+              let l=lanes.findIndex(x=>x<=s); if(l<0){l=lanes.length;lanes.push(e)}else lanes[l]=e;
+              const it={b,s,e,l}; group.push(it); placed.push(it); gEnd=Math.max(gEnd,e);}); flush();
+            return <div key={d} onClick={e=>{if(!onSlot)return;const r=e.currentTarget.getBoundingClientRect();const m=Math.min(23*60+45,H0*60+Math.floor((e.clientY-r.top)/PX*4)*15);onSlot(d,toHM(m))}} title={onSlot?'Pulsa para apuntar una reserva a esta hora':undefined} className={`relative border-l border-line ${onSlot?'cursor-pointer hover:bg-[color-mix(in_srgb,var(--brand)_5%,transparent)]':''}`} style={d===TODAY?{background:'color-mix(in srgb, var(--brand) 6%, transparent)'}:undefined}>
+              {Array.from({length:H1-H0},(_,h)=><span key={h} className="absolute inset-x-0 border-t border-line" style={{top:h*PX}}></span>)}
+              {d===TODAY&&nowM>=H0*60&&<span className="absolute inset-x-0 z-[1] h-0.5 bg-bad" style={{top:(nowM-H0*60)*PX/60}} aria-hidden="true"><span className="absolute -left-1 -top-1 h-2.5 w-2.5 rounded-full bg-bad"></span></span>}
+              {placed.map(({b,s,e,l,n})=>{const top=Math.max(0,(s-H0*60)*PX/60);const h=Math.max(30,(Math.min(e,H1*60)-Math.max(s,H0*60))*PX/60);const clash=b.status!=='completada'&&conflictsOf(b,bookings,settings).length>0;
+                return <button key={b.id} onClick={e=>{e.stopPropagation();open(b.id)}} title={`${b.time} · ${tripName(b)} · ${b.name}`}
+                  className={`absolute z-[2] overflow-hidden rounded-lg border px-1.5 py-1 text-left text-[12px] leading-tight transition hover:z-[3] hover:shadow-md ${clash?'border-bad bg-badsoft':BLOCK[b.status]}`}
+                  style={{top,height:h,left:`calc(${l*100/n}% + 2px)`,width:`calc(${100/n}% - 4px)`}}>
+                  <span className="block font-bold text-ink tnum">{b.dir==='in'?`Recoge ${b.time}`:b.time}</span>
+                  <span className="block truncate font-semibold text-ink">{b.dir==='out'?'→ '+b.dest:b.dest+' →'}</span>
+                  {h>54&&<span className="block truncate text-muted">{b.name}</span>}
+                </button>})}
+            </div>})}
+        </div>
+      </div>
+    </div>
+    <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-line p-3 text-[13px] text-muted">
+      {[['nueva','Por confirmar'],['asignada','Confirmada'],['en_camino','En camino'],['completada','Completada']].map(([k,l])=><span key={k} className="flex items-center gap-1.5"><span className={`h-3 w-3 rounded border ${BLOCK[k]}`}></span>{l}</span>)}
+      <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded border border-bad bg-badsoft"></span>Se solapa</span>
+      <span className="ml-auto">El alto de cada bloque es el tiempo que el taxi está ocupado</span>
+    </div>
+  </div>;
+}
+
+function MonthView({items,month,setMonth,pickDay}){
+  const [y,m]=month.split('-').map(Number);
+  const first=new Date(y,m-1,1); const lead=(first.getDay()+6)%7; const dim=new Date(y,m,0).getDate();
+  const cells=Array.from({length:Math.ceil((lead+dim)/7)*7},(_,i)=>{const dn=i-lead+1;return dn>=1&&dn<=dim?`${y}-${pad(m)}-${pad(dn)}`:null});
+  const stats=d=>{const l=items.filter(b=>b.date===d&&b.status!=='cancelada');return {n:l.length,eur:l.reduce((s,b)=>s+b.total,0),pend:l.filter(b=>b.status==='nueva').length}};
+  const all=cells.filter(Boolean).map(stats); const max=Math.max(1,...all.map(s=>s.n));
+  const tot=all.reduce((s,x)=>({n:s.n+x.n,eur:s.eur+x.eur}),{n:0,eur:0});
+  const go=k=>{const d=new Date(y,m-1+k,1);setMonth(`${d.getFullYear()}-${pad(d.getMonth()+1)}`)};
+  const shade=n=>n?{background:`color-mix(in srgb, var(--brand) ${Math.round(6+n/max*22)}%, transparent)`}:undefined;
+  return <div className="rounded-2xl border border-line bg-surface">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line p-3">
+      <div className="flex items-center gap-2">
+        <button onClick={()=>go(-1)} aria-label="Mes anterior" className="grid h-9 w-9 place-items-center rounded-full border border-line hover:border-brand"><I.Back size={16}/></button>
+        <button onClick={()=>setMonth(TODAY.slice(0,7))} className="h-9 rounded-full border border-line px-3 text-[14px] font-semibold hover:border-brand">Este mes</button>
+        <button onClick={()=>go(1)} aria-label="Mes siguiente" className="grid h-9 w-9 place-items-center rounded-full border border-line hover:border-brand"><I.Chev size={16}/></button>
+        <span className="ml-1 font-bold first-letter:uppercase">{first.toLocaleDateString('es-ES',{month:'long',year:'numeric'})}</span>
+      </div>
+      <div className="text-[14px] text-muted"><b className="text-ink tnum">{tot.n}</b> viajes · <b className="text-ink tnum">{eur(tot.eur)}</b></div>
+    </div>
+    <div className="grid grid-cols-7 border-b border-line text-center text-[12px] font-bold uppercase tracking-wider text-muted">{WD.map(w=><span key={w} className="py-2">{w}</span>)}</div>
+    <div className="grid grid-cols-7">{cells.map((d,i)=>{if(!d) return <span key={i} className="min-h-[76px] border-b border-r border-line bg-sunken sm:min-h-[96px]"></span>;
+      const s=stats(d); const isT=d===TODAY;
+      return <button key={d} onClick={()=>pickDay(d)} aria-label={`${d}: ${s.n} viajes`} className={`flex min-h-[76px] flex-col items-start gap-1 border-b border-r border-line p-1.5 text-left transition hover:outline hover:outline-2 hover:-outline-offset-2 hover:outline-brand sm:min-h-[96px] sm:p-2`} style={shade(s.n)}>
+        <span className={`grid h-7 w-7 place-items-center rounded-full text-[13px] font-bold tnum ${isT?'bg-brandstrong text-white':'text-ink'}`}>{+d.slice(8)}</span>
+        {s.n>0&&<><span className="text-[13px] font-bold text-ink tnum">{s.n} <span className="hidden font-semibold text-muted sm:inline">viaje{s.n>1?'s':''}</span></span>
+          <span className="hidden text-[12px] text-muted tnum sm:block">{eur(s.eur)}</span>
+          {s.pend>0&&<span className="rounded-full bg-warnsoft px-1.5 text-[11px] font-bold text-warn tnum" title={`${s.pend} por confirmar`}>{s.pend} <span className="hidden sm:inline">por confirmar</span></span>}</>}
+      </button>})}</div>
+    <p className="p-3 text-[13px] text-muted">Cuanto más verde, más viajes ese día. Pulsa un día para ver sus reservas.</p>
+  </div>;
+}
+
+function Bookings({bookings,open,update,assign,settings,onCalendar}){
   const [q,setQ]=useState(''); const [st,setSt]=useState('todas'); const [day,setDay]=useState('proximas'); const [date,setDate]=useState('');
-  const list=bookings.filter(b=>(st==='todas'||b.status===st)&&(date?b.date===date:(day==='todas'||(day==='hoy'?b.date===TODAY:day==='proximas'?b.date>=TODAY:b.date<TODAY)))
-    &&(!q||(b.name+b.phone+b.id+b.ss+b.dest).toLowerCase().includes(q.toLowerCase()))).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)*(day==='pasadas'?-1:1));
+  const mode='lista'; const setModeP=()=>{};
+  const [wstart,setWstart]=useState(mondayOf(TODAY)); const [month,setMonth]=useState(TODAY.slice(0,7));
+  const base=bookings.filter(b=>(st==='todas'||b.status===st)&&(!q||(b.name+b.phone+b.id+b.ss+b.dest).toLowerCase().includes(q.toLowerCase())));
+  const list=base.filter(b=>date?b.date===date:(day==='todas'||(day==='hoy'?b.date===TODAY:day==='proximas'?b.date>=TODAY:b.date<TODAY))).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)*(day==='pasadas'?-1:1));
   return <div className="flex flex-col gap-4">
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <p className="text-[14px] text-muted">Todas las reservas en lista, para buscar y filtrar.</p>
+      {onCalendar&&<button onClick={onCalendar} className="flex h-9 items-center gap-1.5 rounded-full border border-line bg-surface px-4 text-[14px] font-semibold hover:border-brand"><I.Cal size={16}/>Ver en el calendario</button>}
+    </div>
     <div className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-3 md:flex-row md:items-center">
       <div className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border border-line px-3"><I.Search className="text-muted"/><input id="r-buscar" aria-label="Buscar reservas" value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar por cliente, teléfono, código u hotel" className="h-full min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted"/></div>
       <div className="flex flex-wrap gap-2">
-        {[['proximas','Próximas'],['hoy','Hoy'],['pasadas','Pasadas'],['todas','Todas']].map(([k,l])=><button key={k} onClick={()=>{setDay(k);setDate('')}} className={`rounded-full px-3 py-1.5 text-[14px] font-semibold ${day===k&&!date?'bg-deep text-white':'bg-sunken'}`}>{l}</button>)}
-        <input id="r-fecha" type="date" aria-label="Filtrar por fecha" value={date} onChange={e=>setDate(e.target.value)} className={`h-9 rounded-full border px-3 text-[14px] font-semibold ${date?'border-brand bg-brandsoft':'border-line bg-surface'}`}/>
+        {mode==='lista'&&[['proximas','Próximas'],['hoy','Hoy'],['pasadas','Pasadas'],['todas','Todas']].map(([k,l])=><button key={k} onClick={()=>{setDay(k);setDate('')}} className={`rounded-full px-3 py-1.5 text-[14px] font-semibold ${day===k&&!date?'bg-deep text-white':'bg-sunken'}`}>{l}</button>)}
+        {mode==='lista'&&<input id="r-fecha" type="date" aria-label="Filtrar por fecha" value={date} onChange={e=>setDate(e.target.value)} className={`h-9 rounded-full border px-3 text-[14px] font-semibold ${date?'border-brand bg-brandsoft':'border-line bg-surface'}`}/>}
         <select id="r-estado" aria-label="Filtrar por estado" value={st} onChange={e=>setSt(e.target.value)} className="h-9 rounded-full border border-line bg-surface px-3 text-[14px] font-semibold">
           <option value="todas">Todos los estados</option>{Object.entries(STATUS).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}</select>
       </div>
     </div>
+    {mode==='semana'&&<WeekView items={base} open={open} settings={settings} start={wstart} setStart={setWstart} bookings={bookings}/>}
+    {mode==='mes'&&<MonthView items={base} month={month} setMonth={setMonth} pickDay={d=>{setDate(d);setModeP('lista')}}/>}
+    {mode==='lista'&&<>
     <ul className="flex flex-col gap-2 md:hidden">{list.map((b,i)=>{const head=i===0||list[i-1].date!==b.date;const d=DRIVERS.find(x=>x.id===b.driverId);return <React.Fragment key={b.id}>
       {head&&<li className="px-1 pt-2 text-[12px] font-bold uppercase tracking-wider text-muted">{dayLabel(b.date)}</li>}
-      <li className={`rounded-2xl border border-line bg-surface ${b.status==='cancelada'?'opacity-60':''}`}><button onClick={()=>open(b.id)} className="w-full rounded-2xl p-4 text-left">
+      <li className={`rounded-2xl border border-line bg-surface ${b.status==='cancelada'?'bg-sunken':''}`}><button onClick={()=>open(b.id)} className="w-full rounded-2xl p-4 text-left">
         <div className="flex items-center justify-between gap-2"><span className="text-[18px] font-extrabold tnum">{b.time}</span><Chip status={b.status}/></div>
         <div className="mt-1 font-semibold">{tripName(b)}</div>
         <div className="mt-1 flex flex-wrap gap-x-3 text-[13px] text-muted"><span>{b.name}</span><span>{b.pax} pax</span><span className="font-semibold text-ink tnum">{eur(b.total)}</span><span>{CHANNEL[b.channel]}</span></div>
@@ -687,63 +894,78 @@ function Bookings({bookings,open,update,assign}){
       {list.length===0&&<li className="rounded-2xl border border-line bg-surface p-6 text-center text-muted">No hay reservas con estos filtros.</li>}</ul>
     <div className="hidden overflow-x-auto rounded-2xl border border-line bg-surface md:block">
       <table className="w-full min-w-[900px] text-left text-[14px]">
-        <thead className="border-b border-line text-[12px] uppercase tracking-wider text-muted"><tr>{['Recogida','Cliente','Trayecto','Viaje','Importe','Estado',''].map(h=><th key={h} className="px-4 py-3 font-bold">{h}</th>)}</tr></thead>
+        <thead className="border-b border-line text-[12px] uppercase tracking-wider text-muted"><tr>{['Recogida','Cliente','Trayecto','Viaje','Importe','Estado',''].map(h=><th key={h||"acc"} className="px-4 py-3 font-bold">{h||<span className="sr-only">Acción rápida</span>}</th>)}</tr></thead>
         <tbody className="divide-y divide-line">{list.map((b,i)=>{const d=DRIVERS.find(x=>x.id===b.driverId);const ex=Object.entries(b.extras||{}).filter(([,v])=>v);
           const [o,t]=b.dir==='out'?[b.ss,b.dest]:[b.dest,b.ss];const head=i===0||list[i-1].date!==b.date;
           const dayN=list.filter(x=>x.date===b.date).length;
           return <React.Fragment key={b.id}>{head&&<tr className="bg-sunken"><td colSpan={7} className="px-4 py-2 text-[12px] font-bold uppercase tracking-wider text-muted">{dayLabel(b.date)} · {dayN} reserva{dayN>1?'s':''}</td></tr>}
-          <tr onClick={()=>open(b.id)} onKeyDown={e=>{if(e.key==='Enter')open(b.id)}} tabIndex={0} className={`cursor-pointer hover:bg-sunken ${b.status==='cancelada'?'opacity-60':''}`}>
+          <tr onClick={()=>open(b.id)} onKeyDown={e=>{if(e.key==='Enter')open(b.id)}} tabIndex={0} className={`cursor-pointer hover:bg-sunken ${b.status==='cancelada'?'bg-sunken':''}`}>
           <td className="px-4 py-3 tnum"><div className="text-[16px] font-bold">{b.time}</div><div className="text-[13px] text-muted">{b.id}</div></td>
           <td className="px-4 py-3"><div className="font-semibold">{b.name}</div><div className="whitespace-nowrap text-[13px] text-muted tnum">{b.phone}</div><div className="text-[13px] text-muted">{CHANNEL[b.channel]}</div></td>
           <td className="max-w-[280px] px-4 py-3"><div className="flex items-center gap-1.5"><span className="h-2 w-2 shrink-0 rounded-full border-2 border-brand"></span><span className="truncate">{o}</span></div>
             <div className="flex items-center gap-1.5"><span className="h-2 w-2 shrink-0 rounded-full bg-brand"></span><span className="truncate font-semibold">{t}</span></div>{b.flight&&<div className="pl-3.5 text-[13px] text-muted">Vuelo {b.flight}</div>}</td>
           <td className="px-4 py-3 text-[13px]"><div>{b.pax} pax</div>{ex.length>0&&<div className="text-muted">{ex.map(([k,v])=>`${v}× ${(DEFAULT_EXTRAS.find(e=>e.id===k)||{name:k}).name.toLowerCase()}`).join(', ')}</div>}</td>
-          <td className="px-4 py-3 tnum"><div className="font-bold">{eur(b.total)}</div><div className="text-[13px] text-muted">{b.paid?'Pagado':'A cobrar'}</div></td>
+          <td className="px-4 py-3 tnum"><div className="font-bold">{eur(b.total)}</div><div className="text-[13px] text-muted">{b.paid?'Pagado':'Pendiente de pago'}</div></td>
           <td className="px-4 py-3"><Chip status={b.status}/></td><td className="px-4 py-3 text-right"><QuickAction b={b} bookings={bookings} update={update} assign={assign}/></td></tr></React.Fragment>})}</tbody>
       </table>
       {list.length===0&&<p className="p-6 text-center text-muted">No hay reservas con estos filtros.</p>}
     </div>
+    </>}
   </div>;
 }
 
 function Detail({b,close,update,bookings,open,settings}){
-  const [note,setNote]=useState(''); const [confirmCancel,setConfirmCancel]=useState(false);
+  const [note,setNote]=useState(''); const [confirmCancel,setConfirmCancel]=useState(false); const [showPay,setShowPay]=useState(false); const [edit,setEdit]=useState(null);
   const [staffNote,setStaffNote]=useState(b?b.staffNote||'':''); const [sentWhat,setSentWhat]=useState('');
+  const ref=useRef(null);
+  useEffect(()=>{ref.current&&ref.current.focus()},[b&&b.id]);
+  useEffect(()=>{const h=e=>{if(e.key==='Escape')close()};document.addEventListener('keydown',h);return()=>document.removeEventListener('keydown',h)},[]);
+  // Al cerrar la ficha, el foco vuelve a donde estaba (la fila de la reserva)
+  useEffect(()=>{const prev=document.activeElement;return()=>{try{prev&&prev.isConnected&&prev.focus()}catch(e){}}},[]);
   if(!b) return null;
   const d=DRIVERS.find(x=>x.id===b.driverId);
   const next={nueva:['asignada','Confirmar reserva'],asignada:['en_camino','Marcar en camino'],en_camino:['completada','Marcar completada']}[b.status];
   const ex=Object.entries(b.extras||{}).filter(([,v])=>v);
-  const ref=useRef(null);
-  useEffect(()=>{ref.current&&ref.current.focus()},[b.id]);
-  useEffect(()=>{const h=e=>{if(e.key==='Escape')close()};document.addEventListener('keydown',h);return()=>document.removeEventListener('keydown',h)},[]);
   return <div className="fixed inset-0 z-40 flex justify-end bg-black/40" onClick={close}>
-    <aside role="dialog" aria-modal="true" aria-label={`Reserva ${b.id}`} onClick={e=>e.stopPropagation()} className="flex h-full w-full max-w-lg flex-col overflow-y-auto bg-bg shadow-2xl"
+    <div role="dialog" aria-modal="true" aria-labelledby="tss-dlg-title" onKeyDown={trapFocus} onClick={e=>e.stopPropagation()} className="flex h-full w-full max-w-lg flex-col overflow-y-auto bg-bg shadow-2xl"
       style={{paddingTop:'env(safe-area-inset-top, 0px)',paddingBottom:'env(safe-area-inset-bottom, 0px)'}}>
       <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-line bg-surface p-4">
         <button ref={ref} onClick={close} aria-label="Cerrar ficha" className="grid h-10 w-10 place-items-center rounded-full hover:bg-sunken"><I.Back/></button>
-        <div className="min-w-0 flex-1"><div className="text-[13px] font-semibold text-muted tnum">{b.id} · {CHANNEL[b.channel]}</div><div className="truncate font-bold">{b.name}</div></div><Chip status={b.status}/>
+        <div className="min-w-0 flex-1"><div className="text-[13px] font-semibold text-muted tnum">{b.id} · {CHANNEL[b.channel]}</div><h2 id="tss-dlg-title" className="truncate font-bold">{b.name}</h2></div><Chip status={b.status}/>
       </div>
       <div className="flex flex-col gap-4 p-4" style={{paddingLeft:'max(16px, env(safe-area-inset-left, 0px))',paddingRight:'max(16px, env(safe-area-inset-right, 0px))'}}>
         <div className="rounded-2xl border border-line bg-surface p-4">
-          <div className="text-[22px] font-extrabold tnum">{b.time} <span className="text-[15px] font-semibold text-muted">· {dayLabel(b.date)}</span></div>
+          {edit?<form className="mb-3 grid grid-cols-2 gap-3 rounded-xl bg-sunken p-3" onSubmit={e=>{e.preventDefault();const ch=[['date','día'],['time','hora'],['pax','pasajeros'],['total','importe']].filter(([k])=>String(edit[k])!==String(b[k])).map(([k,l])=>`${l}: ${b[k]} → ${edit[k]}`);update(b.id,{...edit,pax:+edit.pax,total:+edit.total},ch.length?'Cambios: '+ch.join(', '):'');setEdit(null)}}>
+            <Field label="Día" htmlFor="e-dia"><input id="e-dia" type="date" value={edit.date} onChange={e=>setEdit({...edit,date:e.target.value})} className={inputCls}/></Field>
+            <Field label="Hora" htmlFor="e-hora"><input id="e-hora" type="time" value={edit.time} onChange={e=>setEdit({...edit,time:e.target.value})} className={inputCls}/></Field>
+            <Field label="Pasajeros" htmlFor="e-pax"><input id="e-pax" type="number" min="1" max="8" value={edit.pax} onChange={e=>setEdit({...edit,pax:e.target.value})} className={inputCls}/></Field>
+            <Field label="Importe (€)" htmlFor="e-total"><input id="e-total" type="number" min="0" value={edit.total} onChange={e=>setEdit({...edit,total:e.target.value})} className={inputCls}/></Field>
+            <div className="col-span-2 flex gap-2"><button className="h-10 rounded-full bg-brandstrong px-4 text-[14px] font-bold text-white">Guardar cambios</button><button type="button" onClick={()=>setEdit(null)} className="h-10 rounded-full px-3 text-[14px] font-semibold">Cancelar</button></div>
+          </form>:
+          <div className="flex items-start justify-between gap-3"><div className="text-[22px] font-extrabold tnum">{b.time} <span className="text-[15px] font-semibold text-muted">· {dayLabel(b.date)}</span></div>
+            {b.status!=='cancelada'&&b.status!=='completada'&&<button onClick={()=>setEdit({date:b.date,time:b.time,pax:b.pax,total:b.total})} className="rounded-full border border-line px-3 py-1 text-[13px] font-semibold hover:border-brand">Editar</button>}</div>}
           <div className="mt-1 font-semibold">{tripName(b)}</div>
-          {b.roundTrip&&<div className="text-[14px] text-muted">Vuelta: {dayLabel(b.retDate)} a las {b.retTime}</div>}
+          {b.roundTrip&&<div className="text-[14px] text-muted">Vuelta: {dayLabel(b.retDate)} a las {b.retTime}{b.linked&&<> · <button onClick={()=>open(b.linked)} className="font-semibold text-brandink underline underline-offset-2">ver {b.linked}</button></>}</div>}
+          {b.isReturn&&<div className="text-[14px] text-muted">Viaje de vuelta de <button onClick={()=>open(b.linked)} className="font-semibold text-brandink underline underline-offset-2">{b.linked}</button></div>}
           <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-[14px]">
-            {[['Pasajeros',`${b.pax}`],['Maletas',`${b.luggage.s} peq. · ${b.luggage.m} med. · ${b.luggage.l} gr.`],['Importe',`${eur(b.total)}${b.night?' · noche':''}`],['Pago',`${PAY[b.payment]} · ${b.paid?'pagado':'a cobrar'}`],['Teléfono',b.phone],['Idioma',b.lang],['Ofertas',b.marketing?'Acepta recibirlas':'No acepta'],...(b.flight?[['Vuelo',b.flight]]:[]),...(b.email?[['Email',b.email]]:[])].map(([k,v])=>
+            {[['Pasajeros',`${b.pax}`],['Maletas',`${b.luggage.s} peq. · ${b.luggage.m} med. · ${b.luggage.l} gr.`],['Importe',`${eur(b.total)}${b.night?' · noche':''}`],['Pago',`${PAY[b.payment]} · ${b.paid?'pagado':'pendiente de pago'}`],['Teléfono',b.phone],['Idioma',b.lang],['Ofertas',b.marketing?'Acepta recibirlas':'No acepta'],...(b.flight?[['Vuelo',b.flight]]:[]),...(b.email?[['Email',b.email]]:[])].map(([k,v])=>
               <div key={k} className="min-w-0"><dt className="text-[12px] font-bold uppercase tracking-wider text-muted">{k}</dt><dd className="break-words font-semibold tnum">{v}</dd></div>)}
           </dl>
+          {!b.paid&&b.status!=='cancelada'&&<div className="mt-3 flex flex-wrap gap-2"><button onClick={()=>update(b.id,{paid:true},'Marcada como cobrada')} className="h-10 rounded-full border border-line px-4 text-[14px] font-semibold hover:border-brand">Marcar como cobrada</button>
+            <button onClick={()=>{setShowPay(true);if(!showPay)update(b.id,{payment:'online'},'Enlace de pago creado')}} className="h-10 rounded-full border border-line px-4 text-[14px] font-semibold hover:border-brand">Enlace de pago</button></div>}
+          {showPay&&!b.paid&&<div className="mt-3"><PayLinkBox b={b}/></div>}
           {ex.length>0&&<div className="mt-3 flex flex-wrap gap-2">{ex.map(([k,v])=><span key={k} className="rounded-full bg-brandsoft px-2.5 py-1 text-[13px] font-semibold text-brandink">{v}× {(DEFAULT_EXTRAS.find(e=>e.id===k)||{name:k}).name}</span>)}</div>}
           {b.flightNote&&<div className="mt-3 flex items-center gap-2 rounded-xl bg-infosoft p-3 text-[14px] text-info"><I.Plane/>{b.flightNote}</div>}
           {b.notes&&<div className="mt-3 rounded-xl bg-goldsoft p-3 text-[14px] text-goldink"><b>Comentarios:</b> {b.notes}</div>}
         </div>
 
         {b.status!=='cancelada'&&b.status!=='completada'&&<div className="rounded-2xl border border-line bg-surface p-4">
-          <h4 className="mb-2 font-bold">Estado de la reserva</h4>
-          {(()=>{const c=conflictsOf(b,bookings,settings);return c.length>0&&<div className="mb-2 flex items-start gap-2 rounded-xl bg-badsoft p-3 text-[14px] text-bad"><I.Alert className="mt-0.5 shrink-0"/>
-            <span>Se solapa con {c.map(x=>`${x.name} a las ${x.time}`).join(' y ')}. El taxi está ocupado hasta las {toHM(toMin(b.time)+busyMin(b.dest,settings))} con esta reserva.</span></div>})()}
-          <p className="text-[14px] text-muted">Taxi ocupado de {b.time} a {toHM(toMin(b.time)+busyMin(b.dest,settings))} (ida y vuelta).</p>
+          <h3 className="mb-2 font-bold">Estado de la reserva</h3>
+          {(()=>{const c=conflictsOf(b,bookings,settings);return c.length>0&&<div className="mb-3"><Notice tone="bad" icon={<I.Clock size={18}/>} title={`Se solapa con ${c.map(x=>`${x.name} (${x.time})`).join(' y ')}`}>
+            Con esta reserva el taxi está ocupado hasta las {toHM(spanOf(b,settings).e)}.</Notice></div>})()}
+          <p className="text-[14px] text-muted">Taxi ocupado de {toHM(spanOf(b,settings).a)} a {toHM(spanOf(b,settings).e)} (ida y vuelta{b.dir==='in'?`; sale antes para llegar a la recogida de las ${b.time}`:''}).</p>
           <div className="mt-4 flex flex-wrap gap-2">
-            {next&&<button onClick={()=>update(b.id,{status:next[0],...(next[0]==='asignada'?{driverId:'d1'}:{})},next[0]==='asignada'?'Confirmada · aviso enviado por WhatsApp':next[1].replace('Marcar ','Marcada '))} className="h-11 rounded-full bg-brandstrong px-5 font-bold text-white">{next[1]}</button>}
+            
             {!confirmCancel?<button onClick={()=>setConfirmCancel(true)} className="h-11 rounded-full border border-line px-5 font-semibold text-bad">Cancelar reserva</button>:
               <div className="flex flex-wrap items-center gap-2 rounded-xl bg-badsoft p-2 text-[14px] text-bad"><span className="px-1 font-semibold">¿Cancelar {b.id}?</span>
                 <button onClick={()=>{update(b.id,{status:'cancelada'},'Reserva cancelada');setConfirmCancel(false)}} className="rounded-full bg-bad px-3 py-1.5 font-bold text-white dark:text-[#1a0b0a]">Sí, cancelar</button>
@@ -754,73 +976,157 @@ function Detail({b,close,update,bookings,open,settings}){
         <WaPreview b={b}/>
 
         <div className="rounded-2xl border border-line bg-surface p-4">
-          <h4 className="mb-1 font-bold">Avisar al cliente</h4>
-          <p className="mb-3 text-[13px] text-muted">Mensaje del servicio: se puede enviar aunque no acepte ofertas.</p>
-          <div className="flex flex-wrap gap-2">
-            {[['whatsapp','Recordatorio por WhatsApp',I.Msg,true],['email','Recordatorio por email',I.Mail,!!b.email]].map(([k,l,C,ok])=>
-              <button key={k} disabled={!ok||b.status==='cancelada'||b.status==='completada'} onClick={()=>{update(b.id,{},`${l} enviado`);setSentWhat(k)}}
-                className="flex h-11 items-center gap-2 rounded-full border border-line px-4 text-[14px] font-semibold hover:border-brand disabled:opacity-40"><C/>{l}</button>)}
-          </div>
-          {(b.status==='completada'||b.status==='cancelada')?<p className="mt-2 text-[13px] text-muted">Este viaje ya está {b.status==='completada'?'completado':'cancelado'}: no hace falta recordatorio.</p>
-            :!b.email&&<p className="mt-2 text-[13px] text-muted">Sin email: solo se le puede avisar por WhatsApp.</p>}
-          {sentWhat&&<div className="mt-3 rounded-xl bg-sunken p-3 text-[14px]"><div className="mb-1 text-[12px] font-bold uppercase tracking-wider text-muted">{sentWhat==='email'?`Enviado a ${b.email}`:`Enviado a ${b.phone}`}</div>
-            Hola {b.name.split(' ')[0]}, te recordamos tu taxi: {dayLabel(b.date).toLowerCase()} a las {b.time}, {tripName(b)}. Código {b.id}. Si necesitas cambiar algo, responde a este mensaje.</div>}
+          <h3 className="mb-1 font-bold">Avisar al cliente</h3>
+          <p className="mb-3 text-[13px] text-muted">WhatsApp se abre con el mensaje ya escrito en su idioma: solo hay que pulsar enviar.</p>
+          {(()=>{const act=b.status!=='cancelada'&&b.status!=='completada';const txt={conf:`Hola ${b.name.split(' ')[0]}, tu taxi está confirmado: ${dayLabel(b.date).toLowerCase()} a las ${b.time}, ${tripName(b)}. Código ${b.id}.`,rem:`Hola ${b.name.split(' ')[0]}, te recordamos tu taxi: ${dayLabel(b.date).toLowerCase()} a las ${b.time}, ${tripName(b)}. Código ${b.id}.`,way:`Hola ${b.name.split(' ')[0]}, tu taxi está en camino. Llega en unos minutos.`};
+            return <><div className="flex flex-wrap gap-2">
+              {[['conf','Confirmación'],['rem','Recordatorio'],['way','Voy de camino']].map(([k,l])=><button key={k} disabled={!act} onClick={()=>setSentWhat(k)} className="flex h-11 items-center gap-2 rounded-full border border-line px-4 text-[14px] font-semibold hover:border-brand disabled:opacity-40"><I.Msg/>{l}</button>)}
+              <button disabled={!b.email||!act} onClick={()=>{update(b.id,{},'Recordatorio por email enviado');setSentWhat('email')}} className="flex h-11 items-center gap-2 rounded-full border border-line px-4 text-[14px] font-semibold hover:border-brand disabled:opacity-40"><I.Mail/>Recordatorio por email</button>
+            </div>
+            {!act?<p className="mt-2 text-[13px] text-muted">Este viaje ya está {b.status==='completada'?'completado':'cancelado'}: no hace falta avisar.</p>:!b.email&&<p className="mt-2 text-[13px] text-muted">Sin email: solo se le puede avisar por WhatsApp.</p>}
+            {sentWhat&&<div className="mt-3 rounded-xl bg-sunken p-3 text-[14px]"><div className="mb-1 text-[12px] font-bold uppercase tracking-wider text-muted">{sentWhat==='email'?`Email enviado a ${b.email}`:'Se abre WhatsApp con este mensaje'}</div>
+              {sentWhat==='email'?txt.rem+' Si necesitas cambiar algo, responde a este email.':txt[sentWhat]}</div>}
+            <p className="mt-3 text-[13px] text-muted">Próximamente: asistente de WhatsApp que envía estos avisos solo.</p></>})()}
         </div>
 
-        <div className="rounded-2xl border border-line bg-surface p-4">
-          <h4 className="mb-2 font-bold">Nota interna del equipo</h4>
+        <details className="group rounded-2xl border border-line bg-surface p-4"><summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-bold [&::-webkit-details-marker]:hidden">Nota interna del equipo<I.Chev className="shrink-0 text-muted transition group-open:rotate-90"/></summary><div className="mt-3">
+          
           <textarea id="d-nota-fija" aria-label="Nota interna del equipo" rows={3} value={staffNote} onChange={e=>setStaffNote(e.target.value)} placeholder="Ej.: cliente habitual, prefiere furgoneta, avisar 10 min antes…"
             className="w-full rounded-xl border border-line bg-surface p-3 text-[14px] outline-none focus:border-brand"/>
           <div className="mt-2 flex items-center justify-between gap-3"><span className="text-[13px] text-muted">Solo la ve el equipo, nunca el cliente.</span>
             <button disabled={staffNote===(b.staffNote||'')} onClick={()=>update(b.id,{staffNote},'Nota interna actualizada')} className="h-10 rounded-full bg-deep px-4 text-[14px] font-semibold text-white disabled:opacity-40">Guardar nota</button></div>
-        </div>
+        </div></details>
 
-        {(()=>{const others=bookings.filter(x=>x.phone===b.phone&&x.id!==b.id).sort((x,y)=>(y.date+y.time).localeCompare(x.date+x.time));
-          return <div className="rounded-2xl border border-line bg-surface p-4">
-            <h4 className="mb-1 font-bold">Historial del cliente</h4>
+        {(()=>{const others=bookings.filter(x=>phoneKey(x.phone)===phoneKey(b.phone)&&x.id!==b.id).sort((x,y)=>(y.date+y.time).localeCompare(x.date+x.time));
+          return <details className="group rounded-2xl border border-line bg-surface p-4"><summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-bold [&::-webkit-details-marker]:hidden">Historial del cliente<I.Chev className="shrink-0 text-muted transition group-open:rotate-90"/></summary><div className="mt-3">
+            
             <p className="mb-2 text-[13px] text-muted">{others.length?`${others.length+1} reservas con este teléfono`:'Es su primera reserva'}</p>
             {others.length>0&&<ul className="divide-y divide-line">{others.map(x=><li key={x.id}><button onClick={()=>open(x.id)} className="flex w-full items-center gap-3 py-2.5 text-left text-[14px] hover:bg-sunken">
               <span className="w-24 shrink-0 text-muted tnum">{new Date(x.date+'T12:00').toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'2-digit'})}</span>
               <span className="min-w-0 flex-1 truncate">{tripName(x)}</span><span className="font-semibold tnum">{eur(x.total)}</span></button></li>)}</ul>}
-          </div>})()}
+          </div></details>})()}
 
-        <div className="rounded-2xl border border-line bg-surface p-4">
-          <h4 className="mb-3 font-bold">Actividad de esta reserva</h4>
+        <details className="group rounded-2xl border border-line bg-surface p-4"><summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-bold [&::-webkit-details-marker]:hidden">Actividad de esta reserva<I.Chev className="shrink-0 text-muted transition group-open:rotate-90"/></summary><div className="mt-3">
+          
           <ol className="flex flex-col gap-2 text-[14px]">{[...b.log].reverse().map((l,i)=><li key={i} className="flex gap-3"><span className="w-12 shrink-0 text-muted tnum">{new Date(l.at).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}</span><span>{l.text}</span></li>)}</ol>
           <form className="mt-3 flex gap-2" onSubmit={e=>{e.preventDefault();if(note.trim()){update(b.id,{},'Nota: '+note.trim());setNote('')}}}>
             <input id="d-nota" aria-label="Nota interna" value={note} onChange={e=>setNote(e.target.value)} placeholder="Añadir un apunte al historial" className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 outline-none focus:border-brand"/>
             <button className="h-11 rounded-xl bg-deep px-4 font-semibold text-white">Añadir</button></form>
-        </div>
+        </div></details>
       </div>
-    </aside>
+      <div className="sticky bottom-0 z-10 mt-auto flex items-center gap-2 border-t border-line bg-surface p-3" style={{paddingBottom:'max(12px, env(safe-area-inset-bottom, 0px))'}}>
+        <a href={`tel:${String(b.phone).replace(/[^\d+]/g,'')}`} aria-label={`Llamar a ${b.name}`} className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-line hover:border-brand"><I.Phone/></a>
+        <a href={`https://wa.me/${String(b.phone).replace(/\D/g,'')}`} target="_blank" rel="noopener" aria-label={`WhatsApp a ${b.name}`} className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-line hover:border-brand"><I.Msg/></a>
+        {next?<button onClick={()=>update(b.id,{status:next[0],...(next[0]==='asignada'?{driverId:'d1'}:{})},next[0]==='asignada'?'Confirmada · email de confirmación enviado':next[1].replace('Marcar ','Marcada '))} className="h-12 flex-1 rounded-full bg-brandstrong font-bold text-white hover:opacity-90">{next[1]}</button>:<span className="flex-1 text-center text-[14px] text-muted">{b.status==='cancelada'?'Reserva cancelada':'Viaje completado'}</span>}
+      </div>
+    </div>
   </div>;
 }
 
+
+/* Mantiene el foco del teclado dentro de un diálogo abierto (Tab / Mayús+Tab) */
+function trapFocus(e){ if(e.key!=='Tab') return;
+  const f=[...e.currentTarget.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]):not(.sr-only),select,textarea,[tabindex]:not([tabindex="-1"])')].filter(x=>x.offsetParent!==null);
+  if(!f.length) return; const first=f[0], last=f[f.length-1];
+  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()} else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()} }
+
+
+const extraName=(id,s)=>(((s&&s.extras)||DEFAULT_EXTRAS).find(e=>e.id===id)||{name:id}).name;
+/* ---------- Siguiente recogida (modo conductor): todo lo que necesita a un toque ---------- */
+function NextCard({b,settings,onStatus,open}){
+  const next={nueva:['asignada','Confirmar reserva'],asignada:['en_camino','Voy de camino'],en_camino:['completada','Completar viaje']}[b.status];
+  const pickup=b.dir==='out'?`${b.ss}, Santa Susanna`:b.dest;
+  const maps=`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(pickup)}`;
+  const sp=spanOf(b,settings); const bags=(b.luggage.s||0)+(b.luggage.m||0)+(b.luggage.l||0);
+  const ex=Object.entries(b.extras||{}).filter(([,v])=>v);
+  const wa=`https://wa.me/${String(b.phone).replace(/\D/g,'')}?text=${encodeURIComponent(`Hola ${b.name.split(' ')[0]}, tu taxi está en camino. Llega en unos minutos.`)}`;
+  const big="flex h-14 flex-col items-center justify-center gap-0.5 rounded-xl border border-line bg-surface text-[13px] font-semibold hover:border-brand";
+  return <section aria-labelledby="tss-next" className="rounded-2xl border-2 border-brand bg-surface p-4 sm:p-5">
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <h2 id="tss-next" className="text-[12px] font-bold uppercase tracking-wider text-brandink">Siguiente recogida · {untilLabel(b.time)}</h2>
+        <div className="mt-1 text-[36px] font-extrabold leading-none tnum">{b.time}</div>
+        {b.dir==='in'&&<p className="mt-1 text-[14px] font-semibold text-warn">Sal a las {toHM(sp.a)} para llegar a tiempo</p>}
+      </div>
+      <Chip status={b.status}/>
+    </div>
+    <p className="mt-3 text-[18px] font-bold leading-snug">{tripName(b)}</p>
+    <p className="mt-1 text-[14px] text-muted">{b.name} · {b.pax} pax · {bags} maleta{bags===1?'':'s'}{b.flight?` · vuelo ${b.flight}`:''}</p>
+    {(ex.length>0||b.notes)&&<div className="mt-3 flex flex-wrap gap-2">{ex.map(([k,v])=><span key={k} className="rounded-full bg-brandsoft px-2.5 py-1 text-[13px] font-semibold text-brandink">{v}× {extraName(k,settings)}</span>)}
+      {b.notes&&<p className="w-full rounded-xl bg-goldsoft p-3 text-[14px] text-goldink"><b>Ojo:</b> {b.notes}</p>}</div>}
+    <div className="mt-4 grid grid-cols-3 gap-2">
+      <a href={maps} target="_blank" rel="noopener" className={big}><I.Route/>Navegar</a>
+      <a href={`tel:${String(b.phone).replace(/[^\d+]/g,'')}`} className={big}><I.Phone/>Llamar</a>
+      <a href={wa} target="_blank" rel="noopener" className={big}><I.Msg/>WhatsApp</a>
+    </div>
+    {next&&<button onClick={()=>onStatus(b,next[0])} className="mt-2 h-14 w-full rounded-xl bg-brandstrong text-[17px] font-bold text-white hover:opacity-90">{next[1]}</button>}
+    <button onClick={()=>open(b.id)} className="mt-2 w-full py-2 text-center text-[14px] font-semibold text-brandink underline underline-offset-2">Ver la ficha completa</button>
+  </section>;
+}
+function NoNextCard({up,open}){
+  return <section className="rounded-2xl border border-dashed border-line bg-surface p-4 sm:p-5">
+    <h2 className="font-bold">Hoy no quedan recogidas</h2>
+    {up?<button onClick={()=>open(up.id)} className="mt-1 text-left text-[14px] text-muted hover:text-ink">Próxima: <b className="text-ink">{dayLabel(up.date)} a las {up.time}</b> · {tripName(up)}</button>
+      :<p className="mt-1 text-[14px] text-muted">No hay reservas próximas. Las nuevas aparecerán aquí.</p>}
+  </section>;
+}
+
 /* ---------- Agenda del coche ---------- */
-function Agenda({bookings,open,assign,settings}){
-  const [day,setDay]=useState(TODAY);
-  const days=[TODAY,addDays(1),addDays(2),addDays(3)];
-  const list=bookings.filter(b=>b.date===day&&b.status!=='cancelada').sort((a,b)=>a.time.localeCompare(b.time));
+function Agenda({bookings,open,assign,settings,onNew}){
+  const small=(()=>{try{return window.matchMedia('(max-width: 767px)').matches}catch(e){return false}})();
+  const [mode,setMode]=useState(()=>{let m=null;try{m=localStorage.getItem('tss-vista-agenda')}catch(e){};return m||(small?'dia':'semana')});
+  const setModeP=m=>{setMode(m);try{localStorage.setItem('tss-vista-agenda',m)}catch(e){}};
+  const [day,setDay]=useState(TODAY); const [wstart,setWstart]=useState(()=>small?TODAY:mondayOf(TODAY)); const [month,setMonth]=useState(TODAY.slice(0,7));
+  const items=bookings.filter(b=>b.status!=='pago_pendiente');
+  return <div className="flex flex-col gap-4">
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="inline-flex rounded-full border border-line bg-surface p-1" role="tablist" aria-label="Vista del calendario">
+        {[['dia','Día'],['semana',small?'3 días':'Semana'],['mes','Mes']].map(([k,l])=><button key={k} role="tab" aria-selected={mode===k} onClick={()=>setModeP(k)}
+          className={`h-9 rounded-full px-4 text-[14px] font-semibold ${mode===k?'bg-deep text-white':'text-ink hover:bg-sunken'}`}>{l}</button>)}
+      </div>
+      {onNew&&mode!=='mes'&&<span className="flex items-center gap-1.5 text-[13px] text-muted"><I.Plus size={14}/>Pulsa en un hueco libre para apuntar una reserva</span>}
+      {mode==='mes'&&<span className="text-[13px] text-muted">Pulsa un día para ver sus viajes</span>}
+    </div>
+    {mode==='dia'&&<DayView bookings={items} open={open} assign={assign} settings={settings} day={day} setDay={setDay} onNew={onNew}/>}
+    {mode==='semana'&&<WeekView n={small?3:7} items={items} open={open} settings={settings} start={wstart} setStart={setWstart} bookings={items} onSlot={onNew} pickDay={d=>{setDay(d);setModeP('dia')}}/>}
+    {mode==='mes'&&<MonthView items={items} month={month} setMonth={setMonth} pickDay={d=>{setDay(d);setModeP('dia')}}/>}
+  </div>;
+}
+
+function DayView({bookings,open,assign,settings,day,setDay,onNew}){
+  const list=bookings.filter(b=>b.date===day&&b.status!=='cancelada').sort((x,y)=>spanOf(x,settings).a-spanOf(y,settings).a);
   const startH=6,endH=24,pxMin=1.1;
   const rows=[]; let cursor=startH*60;
-  list.forEach(b=>{const a=toMin(b.time),e=a+busyMin(b.dest,settings); if(a-cursor>=30) rows.push({free:true,from:cursor,to:a}); rows.push({b,from:a,to:e,clash:conflictsOf(b,list,settings).length>0}); cursor=Math.max(cursor,e);});
+  list.forEach(b=>{const {a,e}=spanOf(b,settings); if(a-cursor>=30) rows.push({free:true,from:cursor,to:a}); rows.push({b,from:a,to:e,clash:conflictsOf(b,list,settings).length>0}); cursor=Math.max(cursor,e);});
   if(endH*60-cursor>=30) rows.push({free:true,from:cursor,to:endH*60});
   const busy=list.reduce((s,b)=>s+busyMin(b.dest,settings),0);
+  const nowM=toMin(nowHM()); const past=day<TODAY;
+  const slotStart=r=>{let m=Math.ceil(r.from/15)*15; if(day===TODAY) m=Math.max(m,Math.ceil((nowM+15)/15)*15); return m;};
+  const full=new Date(day+'T12:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
   return <div className="flex flex-col gap-4">
-    <div className="flex flex-wrap gap-2">{days.map(d=>{const n=bookings.filter(b=>b.date===d&&b.status!=='cancelada').length;return <button key={d} onClick={()=>setDay(d)} className={`rounded-full px-4 py-2 text-[14px] font-semibold ${day===d?'bg-deep text-white':'bg-surface border border-line'}`}>{dayLabel(d)} <span className="opacity-70 tnum">· {n}</span></button>})}</div>
-    <div className="grid gap-3 sm:grid-cols-3">
-      {[['Viajes',list.length],['Horas ocupadas',`${hrs(busy)} h`],['Por confirmar',list.filter(b=>b.status==='nueva').length]].map(([k,v])=><div key={k} className="rounded-2xl border border-line bg-surface p-4"><div className="text-[13px] font-semibold text-muted">{k}</div><div className="mt-1 text-[24px] font-extrabold tnum">{v}</div></div>)}
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-3">
+      <div className="flex items-center gap-2">
+        <button onClick={()=>setDay(shiftDay(day,-1))} aria-label="Día anterior" className="grid h-9 w-9 place-items-center rounded-full border border-line hover:border-brand"><I.Back size={16}/></button>
+        <button onClick={()=>setDay(TODAY)} className="h-9 rounded-full border border-line px-3 text-[14px] font-semibold hover:border-brand">Hoy</button>
+        <button onClick={()=>setDay(shiftDay(day,1))} aria-label="Día siguiente" className="grid h-9 w-9 place-items-center rounded-full border border-line hover:border-brand"><I.Chev size={16}/></button>
+        <span className="ml-1 font-bold first-letter:uppercase">{full}</span>
+      </div>
+      <input type="date" aria-label="Ir a un día" value={day} onChange={e=>e.target.value&&setDay(e.target.value)} className="h-9 rounded-full border border-line bg-surface px-3 text-[14px] font-semibold"/>
+    </div>
+    <div className="grid grid-cols-3 gap-3">
+      {[['Viajes',list.length],['Horas ocupadas',`${hrs(busy)} h`],['Por confirmar',list.filter(b=>b.status==='nueva').length]].map(([k,v])=><div key={k} className="min-w-0 rounded-2xl border border-line bg-surface p-3 sm:p-4"><div className="text-[13px] font-semibold text-muted">{k}</div><div className="mt-1 text-[22px] font-extrabold tnum sm:text-[24px]">{v}</div></div>)}
     </div>
     <div className="rounded-2xl border border-line bg-surface p-4">
-      <h3 className="mb-1 font-bold">El día del taxi</h3>
       <p className="mb-4 text-[13px] text-muted">Cada viaje ocupa el coche el tiempo de ida y vuelta. Los huecos libres son las horas que aún puedes vender.</p>
-      <ol className="flex flex-col gap-2">{rows.map((r,i)=>r.free
-        ?<li key={'f'+i} className="flex items-center gap-3 rounded-xl border border-dashed border-line px-3 py-2 text-[14px] text-muted"><span className="w-28 shrink-0 tnum">{toHM(r.from)} – {r.to>=24*60?'24:00':toHM(r.to)}</span><span>Libre · {hrs(r.to-r.from)} h</span></li>
-        :<li key={r.b.id}><button onClick={()=>open(r.b.id)} className={`flex w-full items-center gap-3 rounded-xl border-l-4 px-3 py-3 text-left ${r.clash?'border-bad bg-badsoft':r.b.status==='nueva'?'border-warn bg-warnsoft':'border-brand bg-brandsoft'}`} style={{minHeight:Math.max(56,(r.to-r.from)*pxMin*0.5)}}>
-          <span className="w-28 shrink-0 font-bold tnum">{r.b.time} – {toHM(r.to)}</span>
-          <span className="min-w-0 flex-1"><span className="block truncate font-semibold text-ink">{tripName(r.b)}</span><span className="block truncate text-[13px] text-muted">{r.b.name} · {r.b.pax} pax · {eur(r.b.total)}{r.clash?' · se solapa con otro viaje':''}</span></span>
-          <Chip status={r.b.status}/></button>
-          {r.b.status==='nueva'&&<div className="mt-1.5 pl-1"><AssignBar b={r.b} assign={assign} bookings={bookings} settings={settings}/></div>}</li>)}</ol>
+      <ol className="flex flex-col gap-2">{rows.map((r,i)=>{ if(r.free){ const canAdd=onNew&&!past&&!(day===TODAY&&r.to<=nowM+15);
+          return <li key={'f'+i}>{canAdd?<button onClick={()=>onNew(day,toHM(slotStart(r)))} className="group flex w-full items-center gap-3 rounded-xl border border-dashed border-line px-3 py-2 text-left text-[14px] text-muted hover:border-brand hover:bg-brandsoft">
+              <span className="w-28 shrink-0 tnum">{toHM(r.from)} – {r.to>=24*60?'24:00':toHM(r.to)}</span><span className="flex-1">Libre · {hrs(r.to-r.from)} h</span><span className="flex items-center gap-1 font-semibold text-brandink"><I.Plus size={16}/>Apuntar</span></button>
+            :<div className="flex items-center gap-3 rounded-xl border border-dashed border-line px-3 py-2 text-[14px] text-muted"><span className="w-28 shrink-0 tnum">{toHM(r.from)} – {r.to>=24*60?'24:00':toHM(r.to)}</span><span>Libre · {hrs(r.to-r.from)} h</span></div>}</li>; }
+        return <li key={r.b.id}><button onClick={()=>open(r.b.id)} className={`grid w-full grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 rounded-xl border px-3 py-3 text-left sm:grid-cols-[7rem_minmax(0,1fr)_auto] ${r.clash?'border-bad bg-badsoft':r.b.status==='nueva'?'border-warn bg-warnsoft':r.b.status==='completada'?'border-line bg-sunken':'border-brand bg-brandsoft'}`} style={{minHeight:Math.max(56,(r.to-r.from)*pxMin*0.5)}}>
+          <span className="tnum"><span className="block font-bold">{toHM(r.from)} – {toHM(r.to)}</span><span className="block text-[12px] text-muted">{r.b.dir==='in'?`sale antes · recogida ${r.b.time}`:`recogida ${r.b.time}`}</span></span>
+          <span className="col-span-2 row-start-2 min-w-0 sm:col-span-1 sm:row-start-auto"><span className="block font-semibold text-ink sm:truncate">{tripName(r.b)}</span><span className="block text-[13px] text-muted sm:truncate">{r.b.name} · {r.b.pax} pax · {eur(r.b.total)}{r.clash?' · se solapa con otro viaje':''}</span></span>
+          <span className="col-start-2 row-start-1 justify-self-end sm:col-start-auto sm:row-start-auto"><Chip status={r.b.status}/></span></button>
+          {r.b.status==='nueva'&&<div className="mt-1.5 pl-1"><AssignBar b={r.b} assign={assign} bookings={bookings} settings={settings}/></div>}</li>;})}</ol>
       {list.length===0&&<p className="mt-2 text-muted">No hay viajes este día: el taxi está libre.</p>}
     </div>
   </div>;
@@ -830,22 +1136,52 @@ function Agenda({bookings,open,assign,settings}){
 function Clients({bookings,open}){
   const [q,setQ]=useState('');
   const [only,setOnly]=useState('todos');
+  const [sort,setSort]=useState({k:'last',dir:-1});
   const all=clientsOf(bookings);
-  const rows=all.filter(c=>only==='todos'||(only==='ofertas'?c.marketing:c.count>1)).filter(c=>!q||(c.name+c.phone).toLowerCase().includes(q.toLowerCase())).sort((a,b)=>b.count-a.count||b.spent-a.spent);
+  const val={name:c=>c.name.toLowerCase(),lang:c=>c.lang,count:c=>c.count,spent:c=>c.spent,last:c=>c.last,marketing:c=>c.marketing?1:0};
+  const rows=all.filter(c=>only==='todos'||(only==='ofertas'?c.marketing:c.count>1))
+    .filter(c=>!q||(c.name+c.phone+c.email).toLowerCase().includes(q.toLowerCase()))
+    .sort((a,b)=>{const x=val[sort.k](a),y=val[sort.k](b);return (x<y?-1:x>y?1:0)*sort.dir||b.count-a.count});
+  const lastTxt=c=>{const d=new Date(c.last+'T12:00');return c.last>=addDays(-1)&&c.last<=addDays(1)?dayLabel(c.last):d.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'2-digit'})};
+  const Th=({k,children,right})=>{const on=sort.k===k;return <th className={`px-4 py-3 font-bold ${right?'text-right':''}`} aria-sort={on?(sort.dir>0?'ascending':'descending'):'none'}>
+    <button onClick={()=>setSort(s=>({k,dir:s.k===k?-s.dir:(k==='name'||k==='lang'?1:-1)}))} className={`inline-flex items-center gap-1 uppercase tracking-wider hover:text-ink ${on?'text-ink':''}`}>
+      {children}<span aria-hidden="true" className={on?'':'opacity-0'}>{sort.dir>0?'↑':'↓'}</span></button></th>};
+  const latest=c=>c.list[c.list.length-1].id;
   return <div className="flex flex-col gap-4">
-    <div className="flex h-11 items-center gap-2 rounded-xl border border-line bg-surface px-3"><I.Search className="text-muted"/><input id="c-buscar" aria-label="Buscar clientes" value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar por nombre o teléfono" className="h-full min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted"/></div>
-    <div className="flex flex-wrap gap-2">{[['todos',`Todos (${all.length})`],['habituales',`Repiten (${all.filter(c=>c.count>1).length})`],['ofertas',`Aceptan ofertas (${all.filter(c=>c.marketing).length})`]].map(([k,l])=>
-      <button key={k} onClick={()=>setOnly(k)} className={`rounded-full px-3 py-1.5 text-[14px] font-semibold ${only===k?'bg-deep text-white':'bg-surface border border-line'}`}>{l}</button>)}</div>
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{rows.map(c=><button key={c.phone} onClick={()=>open(c.list[c.list.length-1].id)} className="min-w-0 rounded-2xl border border-line bg-surface p-4 text-left hover:border-brand">
-      <div className="flex items-center justify-between gap-2"><span className="truncate font-bold">{c.name}</span><span className="rounded-full bg-sunken px-2 py-0.5 text-[12px] font-bold">{c.lang}</span></div>
-      <div className="text-[13px] text-muted tnum">{c.phone}</div>
-      <div className="mt-3 flex gap-4 text-[14px]"><span><b className="tnum">{c.count}</b> viajes</span><span><b className="tnum">{eur(c.spent)}</b></span><span className="text-muted">último {dayLabel(c.last).toLowerCase()}</span></div>
-      <div className="mt-2 flex flex-wrap gap-1.5">
-        {c.count>1&&<span className="rounded-full bg-goldsoft px-2.5 py-0.5 text-[12px] font-bold text-goldink">Cliente habitual</span>}
-        <span className={`rounded-full px-2.5 py-0.5 text-[12px] font-bold ${c.marketing?'bg-oksoft text-ok':'bg-sunken text-muted'}`}>{c.marketing?'Acepta ofertas':'Sin permiso de ofertas'}</span>
-        {c.email&&<span className="rounded-full bg-sunken px-2.5 py-0.5 text-[12px] font-bold text-muted">Email</span>}
-      </div>
-    </button>)}</div>
+    <div className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-3 md:flex-row md:items-center">
+      <div className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border border-line px-3"><I.Search className="text-muted"/><input id="c-buscar" aria-label="Buscar clientes" value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar por nombre, teléfono o email" className="h-full min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted"/></div>
+      <div className="flex flex-wrap gap-2">{[['todos',`Todos (${all.length})`],['habituales',`Repiten (${all.filter(c=>c.count>1).length})`],['ofertas',`Aceptan ofertas (${all.filter(c=>c.marketing).length})`]].map(([k,l])=>
+        <button key={k} onClick={()=>setOnly(k)} className={`rounded-full px-3 py-1.5 text-[14px] font-semibold ${only===k?'bg-deep text-white':'bg-sunken'}`}>{l}</button>)}</div>
+    </div>
+
+    <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface md:hidden">{rows.map(c=><li key={c.phone}>
+      <button onClick={()=>open(latest(c))} className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-sunken">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-sunken text-[13px] font-bold">{c.lang}</span>
+        <span className="min-w-0 flex-1"><span className="flex items-center gap-2"><span className="truncate font-semibold">{c.name}</span>{c.count>1&&<span className="shrink-0 rounded-full bg-goldsoft px-2 text-[11px] font-bold text-goldink">Habitual</span>}</span>
+          <span className="block truncate text-[13px] text-muted tnum">{c.phone} · último {lastTxt(c).toLowerCase()}</span></span>
+        <span className="shrink-0 text-right"><span className="block font-bold tnum">{eur(c.spent)}</span><span className="block text-[13px] text-muted tnum">{c.count} viaje{c.count>1?'s':''}</span></span>
+      </button></li>)}
+      {rows.length===0&&<li className="p-6 text-center text-muted">No hay clientes con estos filtros.</li>}</ul>
+
+    <div className="hidden overflow-x-auto rounded-2xl border border-line bg-surface md:block">
+      <table className="w-full min-w-[820px] text-left text-[14px]">
+        <thead className="border-b border-line text-[12px] text-muted"><tr>
+          <Th k="name">Cliente</Th><th className="px-4 py-3 font-bold uppercase tracking-wider">Contacto</th>
+          <Th k="lang">Idioma</Th><Th k="count" right>Viajes</Th><Th k="spent" right>Gastado</Th><Th k="last">Último viaje</Th><Th k="marketing">Ofertas</Th>
+        </tr></thead>
+        <tbody className="divide-y divide-line">{rows.map(c=><tr key={c.phone} tabIndex={0} onClick={()=>open(latest(c))} onKeyDown={e=>{if(e.key==='Enter')open(latest(c))}} className="cursor-pointer hover:bg-sunken">
+          <td className="px-4 py-3"><div className="flex items-center gap-2"><span className="font-semibold">{c.name}</span>{c.count>1&&<span className="rounded-full bg-goldsoft px-2 py-0.5 text-[12px] font-bold text-goldink">Habitual</span>}</div></td>
+          <td className="px-4 py-3"><div className="whitespace-nowrap tnum">{c.phone}</div><div className="max-w-[220px] truncate text-[13px] text-muted">{c.email||'Sin email'}</div></td>
+          <td className="px-4 py-3"><span className="rounded-full bg-sunken px-2 py-0.5 text-[12px] font-bold">{c.lang}</span></td>
+          <td className="px-4 py-3 text-right font-semibold tnum">{c.count}</td>
+          <td className="px-4 py-3 text-right font-semibold tnum">{eur(c.spent)}</td>
+          <td className="px-4 py-3 whitespace-nowrap text-muted">{lastTxt(c)}</td>
+          <td className="px-4 py-3"><span className={`inline-flex items-center gap-1.5 text-[13px] font-semibold ${c.marketing?'text-ok':'text-muted'}`}><span className={`h-2 w-2 rounded-full ${c.marketing?'bg-ok':'bg-line'}`}></span>{c.marketing?'Sí':'No'}</span></td>
+        </tr>)}</tbody>
+      </table>
+      {rows.length===0&&<p className="p-6 text-center text-muted">No hay clientes con estos filtros.</p>}
+    </div>
+    <p className="text-[13px] text-muted">{rows.length} cliente{rows.length===1?'':'s'} · pulsa en uno para ver su última reserva y su historial.</p>
   </div>;
 }
 
@@ -860,17 +1196,15 @@ const SEGMENTS=[
   {id:'idioma',name:'Por idioma',hint:'Elige el idioma',test:(c,lang)=>c.lang===lang},
 ];
 const TEMPLATES=[
-  {id:'vuelve',name:'Vuelve este verano',subject:'¿Vuelves a Santa Susanna este verano?',body:'Hola {nombre}, el año pasado te llevamos en tu viaje y nos encantaría volver a hacerlo. Reserva tu traslado del aeropuerto con precio fijo y un 10 % de descuento con el código VERANO10.'},
-  {id:'repite',name:'Gracias por repetir',subject:'Gracias por confiar otra vez en nosotros',body:'Hola {nombre}, gracias por viajar de nuevo con Taxi Santa Susanna. En tu próxima reserva tienes un 10 % de descuento con el código GRACIAS10.'},
+  {id:'vuelve',name:'Vuelve este verano',subject:'¿Vuelves a Santa Susanna este verano?',body:'Hola {nombre}, el año pasado te llevamos en tu viaje y nos encantaría volver a hacerlo. Reserva tu traslado del aeropuerto con precio fijo en nuestra web.'},
+  {id:'repite',name:'Gracias por repetir',subject:'Gracias por confiar otra vez en nosotros',body:'Hola {nombre}, gracias por viajar de nuevo con Taxi Santa Susanna. Para tu próximo traslado, reserva en nuestra web o escríbenos por WhatsApp.'},
   {id:'resena',name:'Pedir reseña',subject:'¿Qué tal tu viaje con nosotros?',body:'Hola {nombre}, gracias por viajar con Taxi Santa Susanna. Si te ha gustado, nos ayudas mucho dejando tu opinión en Google: solo es un minuto.'},
 ];
 const AUTOS=[
-  {id:'resena',name:'Pedir reseña en Google',when:'Al día siguiente de cada viaje completado',channel:'WhatsApp',service:true},
-  {id:'vuelve',name:'«Te esperamos este verano»',when:'11 meses después de su último viaje',channel:'Email'},
-  {id:'repite',name:'Descuento al que repite',when:'Después de su segundo viaje',channel:'Email'},
+  {id:'resena',name:'Pedir reseña en Google',when:'Al día siguiente de cada viaje completado',channel:'Email'},
 ];
 
-function Campaigns({bookings,settings,setSettings,campaigns,setCampaigns,toast}){
+function Campaigns({bookings,settings,setSettings,campaigns,setCampaigns,toast,onWhatsApp}){
   const clients=useMemo(()=>clientsOf(bookings),[bookings]);
   const [seg,setSeg]=useState('temporada'); const [lang,setLang]=useState('EN');
   const [channel,setChannel]=useState('email'); const [tpl,setTpl]=useState(TEMPLATES[0]);
@@ -907,8 +1241,7 @@ function Campaigns({bookings,settings,setSettings,campaigns,setCampaigns,toast})
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{kpis.map(t=><div key={t.k} className="min-w-0 rounded-2xl border border-line bg-surface p-4">
       <div className="text-[13px] font-semibold text-muted">{t.k}</div><div className="mt-1 text-[26px] font-extrabold tnum">{t.v}</div><div className="text-[13px] text-muted">{t.s}</div></div>)}</div>
 
-    <div className="flex items-start gap-3 rounded-xl bg-infosoft p-3.5 text-[14px] text-info"><I.Info className="mt-0.5 shrink-0"/>
-      <span>Solo reciben campañas los clientes que marcaron la casilla de ofertas al reservar (RGPD). Los avisos del servicio, como la confirmación o el aviso de llegada, se envían siempre.</span></div>
+    <Notice tone="info" icon={<I.Info size={18}/>} title="Solo reciben campañas quienes marcaron la casilla de ofertas al reservar (RGPD)">Los avisos del servicio, como la confirmación o el aviso de llegada, se envían siempre.</Notice>
 
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
       <Section title="1. A quién" icon={I.Users}>
@@ -928,8 +1261,9 @@ function Campaigns({bookings,settings,setSettings,campaigns,setCampaigns,toast})
       <Section title="2. Qué les dices" icon={I.Mail}>
         <div className="grid gap-3">
           <div className="flex flex-wrap gap-2" role="group" aria-label="Canal">
-            {[['email','Email',I.Mail],['whatsapp','WhatsApp',I.Msg]].map(([k,l,C])=><button key={k} type="button" aria-pressed={channel===k} onClick={()=>{setChannel(k);setConfirm(false)}}
+            {[['email','Email',I.Mail]].map(([k,l,C])=><button key={k} type="button" aria-pressed={channel===k} onClick={()=>{setChannel(k);setConfirm(false)}}
               className={`flex h-10 items-center gap-2 rounded-full px-4 text-[14px] font-semibold ${channel===k?'bg-deep text-white':'border border-line bg-surface'}`}><C size={16}/>{l}</button>)}
+            <button type="button" onClick={onWhatsApp} className="flex h-10 items-center gap-2 rounded-full border border-dashed border-line px-4 text-[13px] text-muted hover:border-brand"><I.Msg size={16}/>WhatsApp · próximamente</button>
           </div>
           <div className="flex flex-wrap items-center gap-2"><span className="text-[13px] font-semibold text-muted">Plantillas:</span>
             {TEMPLATES.map(t=><button key={t.id} type="button" onClick={()=>pickTpl(t)} className={`rounded-full border px-3 py-1.5 text-[13px] font-semibold ${tpl.id===t.id?'border-brand bg-brandsoft text-brandink':'border-line hover:border-brand'}`}>{t.name}</button>)}</div>
@@ -941,7 +1275,7 @@ function Campaigns({bookings,settings,setSettings,campaigns,setCampaigns,toast})
             {channel==='email'?<div className="overflow-hidden rounded-xl border border-line bg-surface">
               <div className="border-b border-line bg-sunken px-4 py-2.5 text-[13px]"><span className="text-muted">De:</span> Taxi Santa Susanna · <span className="text-muted">Asunto:</span> <b>{fill(subject)}</b></div>
               <div className="p-4 text-[14px] leading-relaxed">{fill(body)}<div className="mt-4"><span className="inline-block rounded-full bg-[#007A41] px-4 py-2 text-[14px] font-bold text-white">Reservar mi traslado</span></div>
-                <p className="mt-4 text-[13px] text-muted">Recibes este email porque aceptaste recibir ofertas. Darse de baja.</p></div></div>
+                <p className="mt-4 text-[13px] text-muted">Recibes este email porque aceptaste recibir ofertas. <u>Darse de baja</u>.<br/>Taxi Santa Susanna · 08398 Santa Susanna (Barcelona)</p></div></div>
             :<div className="rounded-xl bg-[#EFE7DD] p-3 dark:bg-sunken"><div className="max-w-[92%] rounded-xl border-l-4 border-brand bg-white px-3 py-2 text-[14px] text-[#16221B] shadow-sm dark:bg-surface dark:text-ink">{fill(body)}
               <div className="mt-1 text-[13px] text-[#4B5A51] dark:text-muted">Responde BAJA para no recibir más ofertas.</div></div></div>}
             {sample.lang&&sample.lang!=='ES'&&<p className="mt-2 text-[13px] text-muted">En la versión real, cada cliente lo recibiría traducido a su idioma.</p>}
@@ -972,7 +1306,7 @@ function Campaigns({bookings,settings,setSettings,campaigns,setCampaigns,toast})
           <span className="min-w-0 flex-1"><span className="block font-semibold">{a.name}</span><span className="block text-[13px] text-muted">{a.when} · {a.channel}{a.service?' · a todos los clientes':' · solo con permiso'}</span>
             {auto[a.id]&&<span className="mt-0.5 block text-[13px] font-semibold text-brandink tnum">{autoCount[a.id]} programado{autoCount[a.id]===1?'':'s'} ahora mismo</span>}</span>
           <input id={'auto-'+a.id} type="checkbox" className="peer sr-only" checked={!!auto[a.id]} onChange={e=>setSettings(s=>({...s,automations:{...(s.automations||DEFAULT_AUTOMATIONS),[a.id]:e.target.checked}}))}/>
-          <span className="relative h-7 w-12 shrink-0 rounded-full bg-line transition peer-checked:bg-brandstrong after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" aria-hidden="true"></span>
+          <span className="relative h-7 w-12 shrink-0 rounded-full bg-line transition peer-checked:bg-brandstrong after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5 peer-focus-visible:ring-2 peer-focus-visible:ring-brand peer-focus-visible:ring-offset-2" aria-hidden="true"></span>
         </label>)}</div>
       </Section>
       <Section title="Campañas enviadas" icon={I.List}>
@@ -983,6 +1317,49 @@ function Campaigns({bookings,settings,setSettings,campaigns,setCampaigns,toast})
             <span className="block text-[13px] text-muted">{new Date(c.at).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'})} · {c.segment} · <span className="tnum">{c.sent}</span> enviados</span></span>
           <span className="shrink-0 text-right text-[13px]"><span className="block font-semibold">{c.result}</span>{c.example&&<span className="block text-muted">ejemplo</span>}</span></li>)}</ul>}
       </Section>
+    </div>
+  </div>;
+}
+
+/* ---------- Asistente de WhatsApp (ampliación futura: vista previa) ---------- */
+function WhatsAppView({settings}){
+  const t=settings.tarifas.find(x=>x.name==='Aeropuerto Barcelona-El Prat')||settings.tarifas[0];
+  const chat=[
+    {me:false,t:'08:12',x:"Hi! How much is a taxi from Hotel Riviera to Barcelona airport tomorrow at 6:00? We are 3 people with 3 suitcases."},
+    {me:true,t:'08:12',x:`Hi! 😊 From Hotel Riviera to Barcelona Airport tomorrow at 06:00 it is a fixed price of ${eur(t.night)} (night rate), for up to 4 people with luggage. Shall I book it for you?`},
+    {me:false,t:'08:13',x:'Yes please. Name: Emma Wilson. Flight VY 7821.'},
+    {me:true,t:'08:13',x:`Perfect, Emma. Here is your secure payment link (card, Bizum or PayPal): taxisantasusanna.com/pagar/TS-4871 — your booking is held for 60 minutes.`},
+    {me:true,t:'08:16',x:'Payment received ✅ Your taxi is booked for tomorrow at 06:00 at Hotel Riviera. Code TS-4871. We will remind you this evening.'},
+  ];
+  const feats=[
+    ['Responde al momento, 24 h','En el idioma del cliente y con tus precios reales, también de noche.'],
+    ['Toma la reserva y manda el pago','Pide los datos, comprueba que el taxi esté libre y envía el enlace de pago.'],
+    ['Avisos automáticos','Confirmación, recordatorio el día antes y «voy de camino», sin que tengas que escribir.'],
+    ['Te pasa la conversación cuando hace falta','Si es algo fuera de lo normal (grupos, cambios, quejas), te avisa y sigues tú.'],
+    ['Todo queda en la central','Las reservas de WhatsApp aparecen en el panel como las de la web o el teléfono.'],
+  ];
+  return <div className="flex flex-col gap-5">
+    <Notice tone="info" icon={<I.Msg size={18}/>} title="Ampliación disponible próximamente">La central ya funciona sin esto: confirma por email y abre WhatsApp con el mensaje escrito. El asistente es el siguiente paso, cuando quieras activarlo.</Notice>
+    <div className="grid gap-5 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
+      <div className="overflow-hidden rounded-[28px] border border-line bg-surface shadow-xl" aria-label="Ejemplo de conversación">
+        <div className="flex items-center gap-3 bg-[#075E54] px-4 py-3 text-white"><span className="grid h-9 w-9 place-items-center rounded-full bg-white/20 text-[13px] font-bold">TS</span><div><div className="text-[15px] font-bold">Taxi Santa Susanna</div><div className="text-[12px] opacity-80">Asistente · responde al momento</div></div></div>
+        <div className="flex flex-col gap-2 bg-[#EFE7DD] p-3" style={{minHeight:420}}>
+          <div className="mx-auto mb-1 rounded-lg bg-white/70 px-2 py-0.5 text-[11px] font-semibold text-[#4B5A51]">Ejemplo</div>
+          {chat.map((m,i)=><div key={i} className={`max-w-[85%] rounded-xl px-3 py-2 text-[14px] leading-snug text-[#16221B] shadow-sm ${m.me?'self-end bg-[#D9FDD3]':'self-start bg-white'}`}>{m.x}<div className="mt-0.5 text-right text-[11px] text-[#4F5E66]">{m.t}</div></div>)}
+        </div>
+      </div>
+      <div className="flex min-w-0 flex-col gap-4">
+        <Section title="Qué haría el asistente" icon={I.CheckC}>
+          <ul className="flex flex-col gap-3">{feats.map(([h,d])=><li key={h} className="flex gap-3"><span className="mt-0.5 text-brandink"><I.Check/></span><span><span className="block font-semibold">{h}</span><span className="block text-[14px] text-muted">{d}</span></span></li>)}</ul>
+        </Section>
+        <Section title="Qué hace falta para activarlo" icon={I.Info}>
+          <ul className="flex flex-col gap-2 text-[14px]">
+            <li>· Un número de WhatsApp Business conectado a la API oficial de Meta.</li>
+            <li>· Meta cobra una pequeña cantidad por conversación (aparte del servicio).</li>
+            <li>· Revisar juntos los mensajes y en qué casos te pasa la conversación.</li>
+          </ul>
+        </Section>
+      </div>
     </div>
   </div>;
 }
@@ -1003,9 +1380,15 @@ function Settings({settings,setSettings,onReset}){
           <Field label="Hasta" htmlFor="s-noche-h"><input id="s-noche-h" type="time" value={settings.nightTo} onChange={e=>up('nightTo',e.target.value)} className={inputCls}/></Field>
           <Field label="Plazas del taxi" htmlFor="s-plazas" hint="Las bolsas de golf cuentan como plaza"><input id="s-plazas" type="number" min="1" max="8" value={settings.seats||4} onChange={e=>up('seats',Math.max(1,Math.min(8,+e.target.value||1)))} className={inputCls}/></Field>
           <Field label="Horas de trabajo al día" htmlFor="s-horas" hint="Para calcular cuánto está ocupado el taxi"><input id="s-horas" type="number" min="1" max="24" value={settings.workHours||14} onChange={e=>up('workHours',Math.max(1,Math.min(24,+e.target.value||1)))} className={inputCls}/></Field>
-          <label htmlFor="s-pagoc" className="flex items-center gap-3 self-end rounded-xl bg-sunken p-3.5 font-semibold"><input id="s-pagoc" type="checkbox" checked={settings.payDriver} onChange={e=>up('payDriver',e.target.checked)} className="h-5 w-5 accent-[var(--brand-strong)]"/>Permitir pago en el coche</label>
+          <p className="flex items-center gap-2 self-end rounded-xl bg-sunken p-3.5 text-[14px] font-semibold"><I.Lock size={16}/>Todas las reservas se pagan por adelantado</p>
         </div>
-        <p className="mt-3 text-[13px] text-muted">El horario nocturno, las plazas y las horas de trabajo son valores de ejemplo: ajústalos a tu taxi.</p>
+        <label className="mt-3 flex min-h-[44px] cursor-pointer items-center gap-3 text-[14px] font-semibold"><input type="checkbox" checked={!!settings.nightWeekends} onChange={e=>up('nightWeekends',e.target.checked)} className="h-5 w-5 accent-[var(--brand)]"/>Sábados, domingos y festivos con tarifa de noche todo el día</label>
+        {settings.nightWeekends&&<Field label="Festivos (uno por línea, AAAA-MM-DD)" htmlFor="s-festivos" hint="Festivos de Cataluña ya puestos. Añade las fiestas locales de Santa Susanna."><textarea id="s-festivos" rows={4} value={(settings.holidays||[]).join('\n')} onChange={e=>up('holidays',e.target.value.split(/\s+/).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)))} className={inputCls+' h-auto py-2 tnum'}/></Field>}
+        <p className="mt-3 text-[13px] text-muted">Horario de noche según tu web (20:00–08:00, fines de semana y festivos). Plazas y horas de trabajo: ajústalos a tu taxi.</p>
+      </Section>
+      <Section title="Pagos online" icon={I.Card}>
+        <p className="text-[14px]">Tarjeta y Bizum (Redsys) y PayPal, con las pasarelas que ya tienes en WooCommerce. El dinero va directo a tu cuenta.</p>
+        <p className="mt-2 text-[13px] text-muted">Si un cliente no termina de pagar, la reserva se cancela sola a los 60 minutos y el hueco queda libre.</p>
       </Section>
       <Section title="Extras" icon={I.Lug} aside={<span className="text-[13px] text-muted">Precio con IVA</span>}>
         <div className="divide-y divide-line">{settings.extras.map(e=><div key={e.id} className="flex items-center justify-between gap-3 py-2.5">
@@ -1043,12 +1426,12 @@ function ThemeSwitch({theme,setTheme,compact}){
 }
 
 /* ---------- App ---------- */
-const NAV=[['hoy','Hoy',I.Dash],['nueva','Apuntar reserva',I.NewB],['reservas','Reservas',I.List],['agenda','Agenda',I.Cal],['clientes','Clientes',I.Contacts],['campanas','Campañas',I.Megaphone],['ajustes','Tarifas y extras',I.Sliders]];
+const NAV=[['hoy','Hoy',I.Dash],['nueva','Apuntar reserva',I.NewB],['reservas','Reservas',I.List],['agenda','Calendario',I.Cal],['clientes','Clientes',I.Contacts],['campanas','Campañas',I.Megaphone],['whatsapp','WhatsApp',I.Msg],['ajustes','Tarifas y extras',I.Sliders]];
 
 /* Selector de vista: cliente (web) o propietario (panel) */
 function ModeBar({mode,setMode}){
   const opts=[['cliente','Vista del cliente','en la web',I.Navigation],['panel','Vista del propietario','panel privado',I.Dash]];
-  return <div className="fixed inset-x-0 top-0 z-[35] border-b border-white/10 bg-[#0B1A12] text-white" style={{paddingTop:'env(safe-area-inset-top, 0px)'}}>
+  return <nav aria-label="Cambiar de vista (demostración)" className="fixed inset-x-0 top-0 z-[35] border-b border-white/10 bg-[#0B1A12] text-white" style={{paddingTop:'env(safe-area-inset-top, 0px)'}}>
     <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3" style={{paddingLeft:'max(16px, env(safe-area-inset-left, 0px))',paddingRight:'max(16px, env(safe-area-inset-right, 0px))'}}>
       <span className="hidden text-[13px] font-semibold text-[#C9DBD1] sm:block">Demostración · cambia de vista para ver cada lado</span>
       <div className="mx-auto grid w-full max-w-md grid-cols-2 gap-1 rounded-full bg-white/10 p-1 sm:mx-0 sm:w-auto" role="tablist" aria-label="Vista">
@@ -1057,65 +1440,94 @@ function ModeBar({mode,setMode}){
           <C size={16}/><span className="sm:hidden">{k==='cliente'?'Cliente':'Propietario'}</span><span className="hidden sm:inline">{l}</span></button>)}
       </div>
     </div>
-  </div>;
+  </nav>;
 }
 
 /* Vista del cliente: el formulario tal como iría en su web */
-function ClientSite({settings,bookings,onCreate,onSeeInPanel,theme,setTheme}){
-  return <div className="min-h-full bg-bg">
-    <header className="border-b border-line bg-surface">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 py-3" style={{paddingLeft:'max(16px, env(safe-area-inset-left, 0px))',paddingRight:'max(16px, env(safe-area-inset-right, 0px))'}}>
-        <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-full bg-[#008F4C] text-white"><I.Car/></span>
-          <div><div className="text-[15px] font-extrabold leading-tight">TAXI SANTA SUSANNA</div><div className="text-[12px] font-semibold uppercase tracking-wider text-brandink">Traslados 24 h</div></div></div>
-        <ThemeSwitch theme={theme} setTheme={setTheme} compact/>
-      </div>
-    </header>
-    <section className="bg-deep text-white">
-      <div className="mx-auto max-w-5xl py-8 sm:py-10" style={{paddingLeft:'max(16px, env(safe-area-inset-left, 0px))',paddingRight:'max(16px, env(safe-area-inset-right, 0px))'}}>
-        <p className="text-[13px] font-bold uppercase tracking-wider text-[#FFD940]">Reserva online</p>
-        <h1 className="mt-1 text-[28px] font-extrabold leading-tight sm:text-[36px]">Reserva tu taxi en un minuto</h1>
-        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[14px] text-[#D9E7DF]">
-          {['Precio fijo antes de reservar','Confirmación por WhatsApp','Seguimos tu vuelo'].map(t=><span key={t} className="flex items-center gap-1.5"><span className="text-[#FFD940]"><I.Check size={16}/></span>{t}</span>)}
+// «Qué incluye tu reserva»: mismo bloque que la home de la web nueva
+function TrustBlock(){
+  const cards=[[I.Tag,'Precio fijo','Sin sorpresas, sin taxímetro'],[I.CarSide,'Taxi grande','Vans de 6, 7 y 8 plazas · bajo consulta'],[I.ShieldOk,'Seguridad niños','Sillitas y elevadores infantiles'],[I.Lock,'Pago seguro','Tarjeta, Bizum o PayPal']];
+  const tick=<span aria-hidden="true" className="mr-1">✓</span>;
+  return <section aria-labelledby="incluye-t" className="mb-8 mt-3">
+    <h2 id="incluye-t" className="mb-5 text-center text-[14px] font-extrabold uppercase tracking-[.06em] text-brandink">Qué incluye tu reserva</h2>
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-[1.9fr_repeat(4,1fr)]">
+      <div className="col-span-2 overflow-hidden rounded-2xl border border-[#C9A400] shadow-[0_12px_28px_rgba(0,35,19,.22)] md:col-span-4 xl:col-span-1">
+        <div className="bg-gradient-to-r from-[#F3C800] to-[#FFD940] px-5 py-3 text-[13px] font-extrabold uppercase tracking-[.18em] text-[#002313]">Garantía reserva web</div>
+        <div className="flex flex-col gap-4 px-5 py-5 text-white" style={{background:'linear-gradient(135deg,#002313 0%,#00562D 100%)'}}>
+          <div><h3 className="text-[17px] font-bold"><span aria-hidden="true" className="mr-1 text-[#FFD940]">✓</span>Modifica o cancela sin cargos</h3><p className="mt-1 text-[14px] text-white/90">Hasta <b className="text-[#FFD940]">3h antes</b> sin penalización.</p></div>
+          <div className="h-px bg-gradient-to-r from-white/25 to-transparent"/>
+          <div><h3 className="text-[17px] font-bold"><span aria-hidden="true" className="mr-1 text-[#FFD940]">✓</span>Garantía de servicio</h3><p className="mt-1 text-[14px] text-white/90">Si no, te devolvemos el <b className="text-[#FFD940]">150%</b> de tu transfer.</p></div>
         </div>
       </div>
-    </section>
-    <div className="mx-auto max-w-5xl py-6" style={{paddingLeft:'max(16px, env(safe-area-inset-left, 0px))',paddingRight:'max(16px, env(safe-area-inset-right, 0px))'}}>
-      <BookingForm settings={settings} onCreate={onCreate} onSeeInPanel={onSeeInPanel} bookings={bookings}/>
+      {cards.map(([Ic,t,d])=><div key={t} className="relative flex flex-col items-center rounded-2xl border border-line bg-surface px-3 pb-5 pt-6 text-center">
+        <span aria-hidden="true" className="absolute left-1/2 top-0 h-[3px] w-20 -translate-x-1/2 rounded-b bg-gradient-to-r from-[#008F4C] to-[#F3C800]"/>
+        <span aria-hidden="true" className="grid h-[68px] w-[68px] place-items-center rounded-full border border-dashed border-line"><span className="grid h-14 w-14 place-items-center rounded-full bg-brandsoft text-ink"><Ic size={24}/></span></span>
+        <h3 className="mt-3 text-[16px] font-bold"><span className="text-brandink">{tick}</span>{t}</h3>
+        <p className="mt-1.5 text-[14px] leading-snug text-muted">{d}</p>
+      </div>)}
     </div>
+  </section>;
+}
+function ClientSite({settings,bookings,onCreate,onSeeInPanel,theme,setTheme}){
+  const pad={paddingLeft:'max(16px, env(safe-area-inset-left, 0px))',paddingRight:'max(16px, env(safe-area-inset-right, 0px))'};
+  return <div className="min-h-full bg-bg">
+    <header className="bg-[#002313] text-white">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 py-3" style={pad}>
+        <div className="flex items-center gap-2.5"><img src={LOGO_CREST} alt="" className="h-12 w-auto"/>
+          <div className="leading-tight"><div className="text-[19px] font-bold">Taxi</div><div className="text-[15px] font-medium">Santa Susanna</div></div></div>
+        <div className="flex items-center gap-3"><span className="flex items-center gap-1.5 text-[14px] font-bold" title="Idioma de la web"><I.Globe size={18}/>ES</span><div className="text-ink"><ThemeSwitch theme={theme} setTheme={setTheme} compact/></div></div>
+      </div>
+    </header>
+    <main>
+    {/* Cabecera de página interior, como /tarifas/ de la web nueva (la foto y «Tu transfer…» son solo de la home) */}
+    <section className="text-center text-white" style={{background:'linear-gradient(#002313 0%, #004726 100%)'}}>
+      <div className="mx-auto max-w-3xl pb-11 pt-14 sm:pb-14 sm:pt-16" style={pad}>
+        <h1 className="text-[32px] font-extrabold leading-tight sm:text-[44px]">Reserva tu taxi <span className="text-[#FFD940]">a precio fijo</span></h1>
+        <p className="mt-3 text-[16px] text-white/90 sm:text-[18px]">Elige tu destino, la forma de pago y recíbelo en tu email.</p>
+      </div>
+    </section>
+    <div className="mx-auto max-w-6xl py-5" style={pad}>
+      <TrustBlock/>
+      <BookingForm settings={settings} onCreate={onCreate} onSeeInPanel={onSeeInPanel} bookings={bookings}/>
+      <p className="mt-6 text-center text-[13px] text-muted">El formulario se muestra en castellano, català o English según el idioma de la web.</p>
+    </div>
+    </main>
   </div>;
 }
 
 const VISTA=(()=>{try{const v=new URLSearchParams(location.search).get('vista');return v==='panel'||v==='cliente'?v:null}catch(e){return null}})();
 if(VISTA) document.documentElement.style.setProperty('--mb','0px');
 function App(){
-  const saved=store.get('tss-central-v5');
+  const saved=store.get('tss-central-v7');
   const [bookings,setBookings]=useState(()=>{if(saved&&saved.bookings){seq=Math.max(seq,...saved.bookings.map(b=>+String(b.id).slice(3)||0))+1;return saved.bookings}return seed()});
   const [settings,setSettings]=useState(()=>saved&&saved.settings||DEFAULT_SETTINGS);
   const h0=location.hash.replace('#','');
   const [mode,setModeS]=useState(VISTA||(h0==='cliente'||!NAV.some(n=>n[0]===h0)?'cliente':'panel'));
   const [view,setView]=useState(NAV.some(n=>n[0]===h0)?h0:'hoy'); const [sel,setSel]=useState(null); const [toast,setToast]=useState('');
-  const [campaigns,setCampaigns]=useState(()=>saved&&saved.campaigns||SEED_CAMPAIGNS());
+  const [campaigns,setCampaigns]=useState(()=>saved&&saved.campaigns||SEED_CAMPAIGNS()); const [prefill,setPrefill]=useState(null);
   const [theme,setTheme]=useState(()=>store.get('tss-tema')||'auto');
   useEffect(()=>{const r=document.documentElement;if(theme==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',theme);store.set('tss-tema',theme)},[theme]);
-  useEffect(()=>{store.set('tss-central-v5',{bookings,settings,campaigns})},[bookings,settings,campaigns]);
+  useEffect(()=>{store.set('tss-central-v7',{bookings,settings,campaigns})},[bookings,settings,campaigns]);
   // Sincroniza con otras ventanas abiertas (p. ej. el móvil y el panel de la presentación)
-  useEffect(()=>{const h=e=>{if(e.key!=='tss-central-v5'||!e.newValue)return;let d;try{d=JSON.parse(e.newValue)}catch(_){return}
+  useEffect(()=>{const h=e=>{if(e.key!=='tss-central-v7'||!e.newValue)return;let d;try{d=JSON.parse(e.newValue)}catch(_){return}
     if(d.bookings){seq=Math.max(seq,...d.bookings.map(b=>+String(b.id).slice(3)||0))+1;
       setBookings(prev=>{const nb=d.bookings.filter(b=>!prev.some(p=>p.id===b.id));if(nb.length)setTimeout(()=>setToast(`Nueva reserva de ${nb[nb.length-1].name}`),0);return d.bookings})}
     if(d.settings)setSettings(d.settings); if(d.campaigns)setCampaigns(d.campaigns)};
     addEventListener('storage',h);return()=>removeEventListener('storage',h)},[]);
+  // Si el panel se queda abierto pasada la medianoche, recarga para que «Hoy» sea el día nuevo (los datos se mantienen)
+  useEffect(()=>{const t=setInterval(()=>{if(isoDay(new Date())!==TODAY)location.reload()},60000);return()=>clearInterval(t)},[]);
   useEffect(()=>{if(toast){const t=setTimeout(()=>setToast(''),2600);return()=>clearTimeout(t)}},[toast]);
   const update=(id,patch,logText)=>{const now=new Date().toISOString();
     const extra=patch.status==='completada'&&(settings.automations||{}).resena?[{at:now,text:'Petición de reseña en Google programada para mañana'}]:[];
     setBookings(bs=>bs.map(b=>b.id===id?{...b,...patch,log:[...b.log,...(logText?[{at:now,text:logText}]:[]),...extra]}:b));if(logText)setToast(logText)};
-  const assign=(id)=>{update(id,{driverId:'d1',status:'asignada'},'Confirmada · aviso enviado por WhatsApp')};
-  const create=b=>{setBookings(bs=>[...bs,b]);setToast(`Reserva ${b.id} creada`)};
+  const assign=(id)=>{update(id,{driverId:'d1',status:'asignada'},'Confirmada · email de confirmación enviado')};
+  const create=b=>{const l=[].concat(b);setBookings(bs=>[...bs,...l]);setToast(l.length>1?`Reservas ${l.map(x=>x.id).join(' y ')} creadas (ida y vuelta)`:`Reserva ${l[0].id} creada`)};
   const current=bookings.find(b=>b.id===sel);
   const pendingN=bookings.filter(b=>b.status==='nueva'&&b.date>=TODAY).length;
-  const title={hoy:'Hoy',nueva:'Apuntar reserva',reservas:'Reservas',agenda:'Agenda del taxi',clientes:'Clientes',campanas:'Campañas',ajustes:'Tarifas y extras'}[view];
-  const sub={hoy:new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}),nueva:'Para las reservas que entran por teléfono, WhatsApp o un hotel',reservas:`${bookings.length} reservas en total`,agenda:'Horas ocupadas y libres de tu coche',clientes:'Agrupados por teléfono',campanas:'Emails y WhatsApp a tus clientes, con su permiso',ajustes:'Precios reales de la web, editables'}[view];
+  const title={hoy:'Hoy',nueva:'Apuntar reserva',reservas:'Reservas',agenda:'Calendario',clientes:'Clientes',campanas:'Campañas',whatsapp:'Asistente de WhatsApp',ajustes:'Tarifas y extras'}[view];
+  const sub={hoy:new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}),nueva:'Para las reservas que entran por teléfono, WhatsApp o un hotel',reservas:`${bookings.length} reservas en total`,agenda:'Tus viajes y los huecos libres del taxi',clientes:'Agrupados por teléfono',campanas:'Emails a tus clientes, con su permiso',whatsapp:'Ampliación disponible próximamente',ajustes:'Precios reales de la web, editables'}[view];
   const setHash=h=>{try{history.replaceState(null,'','#'+h)}catch(e){}};
-  const go=v=>{setView(v);setHash(v);window.scrollTo(0,0)};
+  const go=v=>{if(v!=='nueva')setPrefill(null);setView(v);setHash(v);window.scrollTo(0,0)};
   const setMode=m=>{setModeS(m);setSel(null);setHash(m==='cliente'?'cliente':view);window.scrollTo(0,0)};
   const seeInPanel=id=>{setModeS('panel');setView('hoy');setHash('hoy');window.scrollTo(0,0);setSel(id)};
   const gut={paddingLeft:'max(16px, env(safe-area-inset-left, 0px))',paddingRight:'max(16px, env(safe-area-inset-right, 0px))'};
@@ -1127,11 +1539,12 @@ function App(){
 
     {mode==='panel'&&<>
     <aside className="fixed bottom-0 left-0 z-30 hidden w-64 flex-col bg-deep p-4 text-ondeep md:flex" style={{top:'var(--mb)',paddingLeft:'max(16px, env(safe-area-inset-left, 0px))'}}>
-      <div className="mb-6 flex items-center gap-3 px-1"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#FFD940] text-[#002313]"><I.Car/></span>
-        <div className="min-w-0"><div className="whitespace-nowrap text-[14px] font-extrabold leading-tight text-white">TAXI SANTA SUSANNA</div><div className="text-[12px] font-semibold uppercase tracking-wider text-[#FFD940]">Central de reservas</div></div></div>
+      <div className="mb-6 px-1"><img src={LOGO_FULL} alt="Taxi Santa Susanna" className="h-14 w-auto"/>
+        <div className="mt-2 text-[12px] font-semibold uppercase tracking-wider text-[#FFD940]">Central de reservas</div></div>
       <nav className="flex flex-col gap-1" aria-label="Secciones">{NAV.map(([k,l,C])=><button key={k} onClick={()=>go(k)} aria-current={view===k?'page':undefined}
         className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-semibold ${view===k?'bg-white text-[#002313]':'text-ondeep hover:bg-white/10'}`}><C/><span className="flex-1">{l}</span>
-        {k==='agenda'&&pendingN>0&&<span className="rounded-full bg-[#FFD940] px-2 text-[12px] font-bold text-[#002313] tnum">{pendingN}</span>}</button>)}</nav>
+        {k==='whatsapp'&&<span className={`rounded-full px-2 text-[11px] font-bold uppercase tracking-wide ${view===k?'bg-[#002313] text-[#FFD940]':'bg-white/15 text-[#FFD940]'}`}>Pronto</span>}
+        {k==='hoy'&&pendingN>0&&<span className="rounded-full bg-[#FFD940] px-2 text-[12px] font-bold text-[#002313] tnum">{pendingN}</span>}</button>)}</nav>
       <div className="mt-auto flex flex-col gap-3">
         <ThemeSwitch theme={theme} setTheme={setTheme}/>
         <div className="rounded-xl bg-white/5 p-3 text-[12px] leading-relaxed text-ondeep">Demostración con datos de ejemplo. Tarifas, hoteles y extras reales de la web.</div>
@@ -1150,19 +1563,20 @@ function App(){
         </div>
       </header>
       <div className="mx-auto max-w-6xl py-5 pb-28 md:pb-10" style={gut}>
-        {view==='hoy'&&<Today bookings={bookings} open={setSel} assign={assign} settings={settings}/>}
-        {view==='nueva'&&<BookingForm settings={settings} onCreate={create} staff panel bookings={bookings}/>}
-        {view==='reservas'&&<Bookings bookings={bookings} open={setSel} update={update} assign={assign}/>}
-        {view==='agenda'&&<Agenda bookings={bookings} open={setSel} assign={assign} settings={settings}/>}
+        {view==='hoy'&&<Today bookings={bookings} open={setSel} assign={assign} settings={settings} onStatus={(b,st)=>st==='asignada'?assign(b.id):update(b.id,{status:st},st==='en_camino'?'Marcada en camino':'Marcada completada')}/>}
+        {view==='nueva'&&<BookingForm key={prefill?prefill.date+prefill.time:'nueva'} prefill={prefill} settings={settings} onCreate={create} staff panel bookings={bookings}/>}
+        {view==='reservas'&&<Bookings bookings={bookings} open={setSel} update={update} assign={assign} settings={settings} onCalendar={()=>go('agenda')}/>}
+        {view==='agenda'&&<Agenda bookings={bookings} open={setSel} assign={assign} settings={settings} onNew={(d,t)=>{setPrefill({date:d,time:t,retDate:d});go('nueva')}}/>}
         {view==='clientes'&&<Clients bookings={bookings} open={setSel}/>}
-        {view==='campanas'&&<Campaigns bookings={bookings} settings={settings} setSettings={setSettings} campaigns={campaigns} setCampaigns={setCampaigns} toast={setToast}/>}
+        {view==='campanas'&&<Campaigns bookings={bookings} settings={settings} setSettings={setSettings} campaigns={campaigns} setCampaigns={setCampaigns} toast={setToast} onWhatsApp={()=>go('whatsapp')}/>}
+        {view==='whatsapp'&&<WhatsAppView settings={settings}/>}
         {view==='ajustes'&&<Settings settings={settings} setSettings={setSettings} onReset={()=>{setBookings(seed());setSettings(DEFAULT_SETTINGS);setCampaigns(SEED_CAMPAIGNS());setToast('Datos de ejemplo restablecidos')}}/>}
       </div>
     </main>
 
     {view!=='nueva'&&<nav aria-label="Secciones" className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-line bg-surface md:hidden" style={{paddingBottom:'env(safe-area-inset-bottom, 0px)',paddingLeft:'env(safe-area-inset-left, 0px)',paddingRight:'env(safe-area-inset-right, 0px)'}}>
-      {NAV.filter(n=>n[0]!=='nueva').map(([k,l,C])=><button key={k} onClick={()=>go(k)} aria-current={view===k?'page':undefined} className={`relative flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold ${view===k?'text-brandink':'text-muted'}`}>
-        <C/>{l.split(' ')[0]}{k==='agenda'&&pendingN>0&&<span className="absolute right-[22%] top-1 h-2 w-2 rounded-full bg-[#E9A800]" aria-label={`${pendingN} por confirmar`}></span>}</button>)}
+      {NAV.filter(n=>n[0]!=='nueva'&&n[0]!=='whatsapp').map(([k,l,C])=><button key={k} onClick={()=>go(k)} aria-current={view===k?'page':undefined} className={`relative flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold ${view===k?'text-brandink':'text-muted'}`}>
+        <C/>{l.split(' ')[0]}{k==='hoy'&&pendingN>0&&<span className="absolute right-[22%] top-1 h-2 w-2 rounded-full bg-[#E9A800]" aria-label={`${pendingN} por confirmar`}></span>}</button>)}
     </nav>}
 
     <Detail key={sel||'none'} b={current} close={()=>setSel(null)} update={update} bookings={bookings} open={setSel} settings={settings}/>
