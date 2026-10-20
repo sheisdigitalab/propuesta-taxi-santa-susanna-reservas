@@ -392,7 +392,7 @@ function Notice({tone='warn',icon,title,children,action,onClick}){
 }
 
 /* ---------- Formulario de reserva (una sola pantalla) ---------- */
-const emptyForm = (staff) => ({from:null,to:null,date:staff?TODAY:'',time:'',roundTrip:false,retDate:staff?addDays(3):'',retTime:'',pax:staff?2:1,luggage:staff?{s:0,m:1,l:1}:{s:0,m:0,l:0},extras:{},
+const emptyForm = (staff) => ({from:null,to:null,date:'',time:'',roundTrip:false,retDate:'',retTime:'',pax:1,luggage:{s:0,m:0,l:0},extras:{},
   wheelFoldable:true,name:'',prefix:'+34',phone:'',email:'',flight:'',notes:'',payment:'online',terms:false,marketing:false,channel:'web'});
 
 function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefill}){
