@@ -393,13 +393,13 @@ function Notice({tone='warn',icon,title,children,action,onClick}){
 
 /* ---------- Formulario de reserva (una sola pantalla) ---------- */
 const emptyForm = (staff) => ({from:null,to:null,date:'',time:'',roundTrip:false,retDate:'',retTime:'',pax:1,luggage:{s:0,m:0,l:0},extras:{},
-  wheelFoldable:true,name:'',prefix:'+34',phone:'',email:'',flight:'',notes:'',payment:'online',terms:false,marketing:false,channel:'web'});
+  wheelFoldable:true,name:'',prefix:'+34',phone:'',email:'',flight:'',notes:'',payment:'online',terms:false,marketing:false,needs:null,channel:'web'});
 
 function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefill}){
   const [showExtras,setShowExtras]=useState(false); const [arrive,setArrive]=useState(false);
   const [f,setF]=useState(()=>({...emptyForm(staff),...(prefill||{})})); const [errors,setErrors]=useState({}); const [done,setDone]=useState(null); const [paying,setPaying]=useState(null);
-  const ERR_OF={from:'route',to:'route',date:'date',time:'time',retDate:'ret',retTime:'ret',pax:'pax',extras:'pax',name:'name',phone:'phone',email:'email',terms:'terms'};
-  const set=(k,v)=>{setF(p=>({...p,[k]:v,...(k==='date'&&v&&p.retDate<v?{retDate:v}:{})}));const ek=ERR_OF[k];if(ek)setErrors(e=>{if(!e[ek])return e;const n={...e};delete n[ek];return n})};
+  const ERR_OF={from:'route',to:'route',date:'date',time:'time',retDate:'ret',retTime:'ret',pax:'pax',name:'name',phone:'phone',email:'email',terms:'terms',needs:'needs'};
+  const set=(k,v)=>{setF(p=>({...p,[k]:v,...(k==='date'&&v&&p.retDate<v?{retDate:v}:{}),...(k==='extras'&&Object.values(v).some(Boolean)?{needs:'yes'}:{})}));if(k==='extras'){setErrors(e=>{if(!e.pax&&!e.needs)return e;const n={...e};delete n.pax;if(Object.values(v).some(Boolean))delete n.needs;return n})}const ek=ERR_OF[k];if(ek)setErrors(e=>{if(!e[ek])return e;const n={...e};delete n[ek];return n})};
   const ssOpts=useMemo(()=>PUNTOS_SS.map(n=>({key:'ss-'+n,label:n,type:'ss',group:'Santa Susanna · recogida en tu hotel'})),[]);
   const destOpts=useMemo(()=>settings.tarifas.map(t=>({key:t.id,label:t.name,type:'dest',group:CAT_LABEL[t.cat],right:'desde '+eur(t.day)})),[settings.tarifas]);
   const HUB=/Aeropuerto|Sants|Port de|AVE|BUS/;
@@ -451,6 +451,7 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
     if(f.email.trim()&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim())) er.email='Escribe un email válido.';
     else if(!staff&&!f.email.trim()) er.email='Necesitamos tu email para enviarte la confirmación.';
     if(!staff&&!f.terms) er.terms='Acepta las condiciones para reservar.';
+    if(!staff&&f.needs!=='no'&&!Object.values(f.extras).some(Boolean)) er.needs=f.needs==='yes'?'Elige qué necesitas o marca «No, nada más».':'Dinos si necesitas algo más: marca «No, nada más» o elige lo que necesitas.';
     setErrors(er); if(Object.keys(er).length){ const first=document.querySelector('[data-err="1"]'); if(first) first.scrollIntoView({behavior:'smooth',block:'center'}); return; }
     const tel=f.phone.trim(); const pre=tel.startsWith('+')?(Object.keys(LANG_BY_PREFIX).find(p=>tel.startsWith(p))||''):f.prefix;
     const now=new Date().toISOString();
@@ -553,10 +554,20 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
       </div>
     </Section>
 
-    <Section title={staff?"Necesidades especiales":"4. ¿Necesitas algo más?"} icon={I.Wheel} aside={<span className="text-[13px] text-muted">Opcional</span>}>
-      {(()=>{const chosen=settings.extras.filter(e=>f.extras[e.id]);return !showExtras&&<div className="flex flex-col gap-3">
+    <Section title={staff?"Necesidades especiales":"4. ¿Necesitas algo más?"} icon={I.Wheel} aside={staff?<span className="text-[13px] text-muted">Opcional</span>:null}>
+      {!staff&&<div className="mb-3" data-err={errors.needs?1:0}>
+        <p id="needs-q" className="mb-2 text-[14px] text-muted">Sillita o elevador infantil, carrito, silla de ruedas, bicicleta, bolsa de golf, mascota o una parada adicional.</p>
+        <div role="radiogroup" aria-labelledby="needs-q" aria-invalid={!!errors.needs} className="grid grid-cols-2 gap-2">
+          {[['no','No, nada más'],['yes','Sí, necesito algo']].map(([k,l])=>{const on=f.needs===k;return <button type="button" role="radio" aria-checked={on} key={k}
+            onClick={()=>{if(k==='no'){setF(p=>({...p,needs:'no',extras:{}}));setShowExtras(false);}else{setF(p=>({...p,needs:'yes'}));setShowExtras(true);}setErrors(e=>{if(!e.needs)return e;const n={...e};delete n.needs;return n})}}
+            className={`flex min-h-[48px] items-center justify-center gap-2 rounded-xl border px-3 text-[15px] font-semibold ${on?'border-brand bg-brandsoft text-ink':errors.needs?'border-bad':'border-line hover:border-brand'}`}>
+            <span aria-hidden="true" className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 ${on?'border-brand':'border-[#7B8C83]'}`}>{on&&<span className="h-2.5 w-2.5 rounded-full bg-brand"></span>}</span>{l}</button>})}
+        </div>
+        {errors.needs&&<p className="mt-2 text-[13px] font-semibold text-bad">{errors.needs}</p>}
+      </div>}
+      {(()=>{const chosen=settings.extras.filter(e=>f.extras[e.id]);return !showExtras&&(staff||f.needs==='yes')&&<div className="flex flex-col gap-3">
         {chosen.length>0?<div className="flex flex-wrap gap-2">{chosen.map(e=><span key={e.id} className="rounded-full bg-brandsoft px-3 py-1 text-[13px] font-semibold text-brandink">{f.extras[e.id]}× {e.name}</span>)}</div>
-          :<p className="text-[14px] text-muted">Sillita o elevador infantil, carrito, silla de ruedas, bicicleta, bolsa de golf, mascota o una parada adicional.</p>}
+          :staff?<p className="text-[14px] text-muted">Sillita o elevador infantil, carrito, silla de ruedas, bicicleta, bolsa de golf, mascota o una parada adicional.</p>:null}
         <button type="button" onClick={()=>setShowExtras(true)} aria-expanded="false" className="flex h-11 items-center justify-center gap-2 rounded-xl border border-dashed border-line font-semibold text-brandink hover:border-brand"><I.Plus/>{chosen.length?'Cambiar necesidades':'Añadir necesidades'}</button>
       </div>})()}
       {showExtras&&<>
