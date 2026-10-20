@@ -392,12 +392,12 @@ function Notice({tone='warn',icon,title,children,action,onClick}){
 }
 
 /* ---------- Formulario de reserva (una sola pantalla) ---------- */
-const emptyForm = () => ({from:null,to:null,date:TODAY,time:'',roundTrip:false,retDate:addDays(3),retTime:'',pax:2,luggage:{s:0,m:1,l:1},extras:{},
+const emptyForm = (staff) => ({from:null,to:null,date:staff?TODAY:'',time:'',roundTrip:false,retDate:staff?addDays(3):'',retTime:'',pax:staff?2:1,luggage:staff?{s:0,m:1,l:1}:{s:0,m:0,l:0},extras:{},
   wheelFoldable:true,name:'',prefix:'+34',phone:'',email:'',flight:'',notes:'',payment:'online',terms:false,marketing:false,channel:'web'});
 
 function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefill}){
   const [showExtras,setShowExtras]=useState(false); const [arrive,setArrive]=useState(false);
-  const [f,setF]=useState(()=>({...emptyForm(),...(prefill||{})})); const [errors,setErrors]=useState({}); const [done,setDone]=useState(null); const [paying,setPaying]=useState(null);
+  const [f,setF]=useState(()=>({...emptyForm(staff),...(prefill||{})})); const [errors,setErrors]=useState({}); const [done,setDone]=useState(null); const [paying,setPaying]=useState(null);
   const ERR_OF={from:'route',to:'route',date:'date',time:'time',retDate:'ret',retTime:'ret',pax:'pax',extras:'pax',name:'name',phone:'phone',email:'email',terms:'terms'};
   const set=(k,v)=>{setF(p=>({...p,[k]:v,...(k==='date'&&v&&p.retDate<v?{retDate:v}:{})}));const ek=ERR_OF[k];if(ek)setErrors(e=>{if(!e[ek])return e;const n={...e};delete n[ek];return n})};
   const ssOpts=useMemo(()=>PUNTOS_SS.map(n=>({key:'ss-'+n,label:n,type:'ss',group:'Santa Susanna · recogida en tu hotel'})),[]);
@@ -464,7 +464,7 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
     const list=[b];
     if(f.roundTrip){ const r={...b,id:newCode(),date:f.retDate,time:f.retTime,dir:retDir,roundTrip:false,retDate:null,retTime:null,isReturn:true,linked:b.id,
       flight:'',total:q.ret.price+q.extras/2,night:q.ret.night,log:[{at:now,text:`Vuelta de la reserva ${b.id}`}]}; b.linked=r.id; list.push(r); }
-    const finish=()=>{onCreate(list); setDone({...b,grand:q.total,retId:b.linked}); setF(emptyForm()); setErrors({}); window.scrollTo(0,0);};
+    const finish=()=>{onCreate(list); setDone({...b,grand:q.total,retId:b.linked}); setF(emptyForm(staff)); setErrors({}); window.scrollTo(0,0);};
     if(!staff&&f.payment==='online'){ setPaying({total:q.total,finish:m=>{list.forEach(x=>{x.paid=true;x.log.push({at:new Date().toISOString(),text:`Pagado con ${m} (pedido de WooCommerce)`})});finish();}}); window.scrollTo(0,0); return; }
     if(staff&&f.payment==='online') list.forEach(x=>{x.paid=false;x.log.push({at:now,text:'Enlace de pago creado'})});
     finish();
@@ -617,14 +617,14 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
         </div>
         <dl className="divide-y divide-line px-5 text-[14px]">
           {[
-            ['Recogida', f.time?`${dayLabel(f.date)} a las ${f.time}`:'Falta la hora'],
+            ['Recogida', !f.date?'Falta el día':!f.time?'Falta la hora':`${dayLabel(f.date)} a las ${f.time}`],
             ...(q?[['Ida',`${eur(q.out.price)} · ${q.out.night?'noche':'día'}`]]:[]),
             ...(q&&q.ret?[['Vuelta',`${eur(q.ret.price)} · ${q.ret.night?'noche':'día'}`]]:[]),
             ...(q&&q.extras>0?[['Extras',eur(q.extras)]]:[]),
             ['Plazas',vehicle==='grupo'?`${seats} (máx. ${maxSeats})`:`${seats} de ${maxSeats}`],
             ['Equipaje',`${f.luggage.s+f.luggage.m+f.luggage.l} maleta${f.luggage.s+f.luggage.m+f.luggage.l===1?'':'s'}`],
             ['Pago',PAY[f.payment]],
-          ].map(([k,v])=><div key={k} className="flex justify-between gap-3 py-2.5"><dt className="text-muted">{k}</dt><dd className={`text-right font-semibold tnum ${v==='Falta la hora'?'text-warn':''}`}>{v}</dd></div>)}
+          ].map(([k,v])=><div key={k} className="flex justify-between gap-3 py-2.5"><dt className="text-muted">{k}</dt><dd className={`text-right font-semibold tnum ${v==='Falta la hora'||v==='Falta el día'?'text-warn':''}`}>{v}</dd></div>)}
         </dl>
         <div className="p-5 pt-2"><button type="submit" className="h-12 w-full rounded-full bg-brandstrong font-bold text-white hover:opacity-90">{q?(staff?`Reservar · ${eur(q.total)}`:f.payment==='online'?`Reservar y pagar ${eur(q.total)}`:`Reservar · ${eur(q.total)}`):'Reservar'}</button>
           <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-[13px] text-muted">{!staff&&f.payment==='online'&&<I.Lock size={14}/>}{staff?'Se guarda como «Por confirmar»':(f.payment==='online'?'Página de pago segura':'Te enviamos la confirmación por email')}</p>
