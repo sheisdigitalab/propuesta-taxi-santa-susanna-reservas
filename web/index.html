@@ -596,7 +596,7 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
       <div className="flex items-start gap-3 rounded-xl border border-brand bg-brandsoft p-3.5">
         <span className="mt-0.5 text-brandink"><I.Card/></span>
         <div className="min-w-0 text-[14px]">{staff?<><b className="block text-[15px]">Se paga por adelantado con enlace</b><span className="text-muted">Al guardar, tendrás el enlace de pago para mandárselo por WhatsApp.</span></>
-          :<><b className="block text-[15px]">Se paga al reservar{q?`: ${eur(q.total)}`:''}</b><span className="text-muted">En el siguiente paso te llevamos a la pasarela segura de tu banco (Redsys) o a PayPal.</span><PayBadges className="mt-2"/></>}</div>
+          :<><b className="block text-[15px]">Se paga al reservar{q?`: ${eur(q.total)}`:''}</b><span className="text-muted">En el siguiente paso te llevamos a la página de pago segura: tarjeta o PayPal.</span><PayBadges className="mt-2"/></>}</div>
       </div>
       {!staff&&<label htmlFor="f-cond" className="mt-4 flex items-start gap-3 text-[14px]" data-err={errors.terms?1:0}>
         <input id="f-cond" type="checkbox" checked={f.terms} onChange={e=>set('terms',e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[var(--brand-strong)]"/>
@@ -627,7 +627,7 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
           ].map(([k,v])=><div key={k} className="flex justify-between gap-3 py-2.5"><dt className="text-muted">{k}</dt><dd className={`text-right font-semibold tnum ${v==='Falta la hora'?'text-warn':''}`}>{v}</dd></div>)}
         </dl>
         <div className="p-5 pt-2"><button type="submit" className="h-12 w-full rounded-full bg-brandstrong font-bold text-white hover:opacity-90">{q?(staff?`Reservar · ${eur(q.total)}`:f.payment==='online'?`Reservar y pagar ${eur(q.total)}`:`Reservar · ${eur(q.total)}`):'Reservar'}</button>
-          <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-[13px] text-muted">{!staff&&f.payment==='online'&&<I.Lock size={14}/>}{staff?'Se guarda como «Por confirmar»':(f.payment==='online'?'Pasarela segura de tu banco':'Te enviamos la confirmación por email')}</p>
+          <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-[13px] text-muted">{!staff&&f.payment==='online'&&<I.Lock size={14}/>}{staff?'Se guarda como «Por confirmar»':(f.payment==='online'?'Página de pago segura':'Te enviamos la confirmación por email')}</p>
           {!staff&&<><PayBadges className="mt-2 justify-center"/><p className="mt-3 text-center text-[13px] text-muted">Cancelación gratis hasta 3 h antes</p></>}</div>
       </div>
     </aside>
@@ -656,16 +656,16 @@ function WaPreview({b}){
 }
 
 function PayBadges({className=''}){
-  return <ul aria-label="Formas de pago" className={`flex flex-wrap gap-1.5 ${className}`}>{['Visa','Mastercard','Bizum','PayPal'].map(m=><li key={m} className="rounded-md border border-line bg-surface px-2 py-0.5 text-[13px] font-bold text-ink">{m}</li>)}</ul>;
+  return <ul aria-label="Formas de pago" className={`flex flex-wrap gap-1.5 ${className}`}>{['Visa','Mastercard','PayPal'].map(m=><li key={m} className="rounded-md border border-line bg-surface px-2 py-0.5 text-[13px] font-bold text-ink">{m}</li>)}</ul>;
 }
 function PayDemo({total,onPay,onBack}){
   return <div className="mx-auto flex max-w-md flex-col gap-4">
     <div className="rounded-2xl border border-line bg-surface p-6 text-center">
       <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-brandsoft text-brandink"><I.Card/></div>
-      <h2 className="text-[20px] font-extrabold">Pasarela segura de tu banco</h2>
+      <h2 className="text-[20px] font-extrabold">Página de pago segura</h2>
       <p className="mt-1 text-[14px] text-muted">En la web real, aquí se abre la página de pago de WooCommerce con las formas de pago que ya tiene activas.</p>
       <div className="mt-4 text-[32px] font-extrabold tnum">{eur(total)}</div>
-      <div className="mt-4 grid gap-2">{['Tarjeta (Redsys)','Bizum','PayPal'].map(m=><button key={m} type="button" onClick={()=>onPay(m)} className="h-12 rounded-xl border border-line font-semibold hover:border-brand">{m}</button>)}</div>
+      <div className="mt-4 grid gap-2">{['Tarjeta','PayPal'].map(m=><button key={m} type="button" onClick={()=>onPay(m)} className="h-12 rounded-xl border border-line font-semibold hover:border-brand">{m}</button>)}</div>
       <p className="mt-3 text-[13px] text-muted">Demostración: no se cobra nada.</p>
     </div>
     <button type="button" onClick={onBack} className="text-[14px] font-semibold text-muted underline underline-offset-2">Volver al formulario</button>
@@ -1347,7 +1347,7 @@ function WhatsAppView({settings}){
     {me:false,t:'08:12',x:"Hi! How much is a taxi from Hotel Riviera to Barcelona airport tomorrow at 6:00? We are 3 people with 3 suitcases."},
     {me:true,t:'08:12',x:`Hi! 😊 From Hotel Riviera to Barcelona Airport tomorrow at 06:00 it is a fixed price of ${eur(t.night)} (night rate), for up to 4 people with luggage. Shall I book it for you?`},
     {me:false,t:'08:13',x:'Yes please. Name: Emma Wilson. Flight VY 7821.'},
-    {me:true,t:'08:13',x:`Perfect, Emma. Here is your secure payment link (card, Bizum or PayPal): taxisantasusanna.com/pagar/TS-4871 — your booking is held for 60 minutes.`},
+    {me:true,t:'08:13',x:`Perfect, Emma. Here is your secure payment link (card or PayPal): taxisantasusanna.com/pagar/TS-4871 — your booking is held for 60 minutes.`},
     {me:true,t:'08:16',x:'Payment received ✅ Your taxi is booked for tomorrow at 06:00 at Hotel Riviera. Code TS-4871. We will remind you this evening.'},
   ];
   const feats=[
@@ -1406,7 +1406,7 @@ function Settings({settings,setSettings,onReset}){
         <p className="mt-3 text-[13px] text-muted">Horario de noche según tu web (20:00–08:00, fines de semana y festivos). Plazas y horas de trabajo: ajústalos a tu taxi.</p>
       </Section>
       <Section title="Pagos online" icon={I.Card}>
-        <p className="text-[14px]">Tarjeta y Bizum (Redsys) y PayPal, con las pasarelas que ya tienes en WooCommerce. El dinero va directo a tu cuenta.</p>
+        <p className="text-[14px]">Tarjeta y PayPal, con las pasarelas que ya tienes en WooCommerce. Si un día activas Bizum, aparece solo. El dinero va directo a tu cuenta.</p>
         <p className="mt-2 text-[13px] text-muted">Si un cliente no termina de pagar, la reserva se cancela sola a los 60 minutos y el hueco queda libre.</p>
       </Section>
       <Section title="Extras" icon={I.Lug} aside={<span className="text-[13px] text-muted">Precio con IVA</span>}>
@@ -1465,7 +1465,7 @@ function ModeBar({mode,setMode}){
 /* Vista del cliente: el formulario tal como iría en su web */
 // «Qué incluye tu reserva»: mismo bloque que la home de la web nueva
 function TrustBlock(){
-  const cards=[[I.Tag,'Precio fijo','Sin sorpresas, sin taxímetro'],[I.CarSide,'Taxi grande','Vans de 6, 7 y 8 plazas · bajo consulta'],[I.ShieldOk,'Seguridad niños','Sillitas y elevadores infantiles'],[I.Lock,'Pago seguro','Tarjeta, Bizum o PayPal']];
+  const cards=[[I.Tag,'Precio fijo','Sin sorpresas, sin taxímetro'],[I.CarSide,'Taxi grande','Vans de 6, 7 y 8 plazas · bajo consulta'],[I.ShieldOk,'Seguridad niños','Sillitas y elevadores infantiles'],[I.Lock,'Pago seguro','Tarjeta o PayPal']];
   const tick=<span aria-hidden="true" className="mr-1">✓</span>;
   return <section aria-labelledby="incluye-t" className="mb-8 mt-3">
     <h2 id="incluye-t" className="mb-5 text-center text-[14px] font-extrabold uppercase tracking-[.06em] text-brandink">Qué incluye tu reserva</h2>
