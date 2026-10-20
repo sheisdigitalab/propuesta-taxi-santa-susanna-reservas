@@ -593,10 +593,13 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
     </Section>
 
     <Section title={staff?"Pago":"6. Pago seguro"} icon={I.Lock} className={staff?'md:col-span-2':''}>
-      <div className="flex items-start gap-3 rounded-xl border border-brand bg-brandsoft p-3.5">
-        <span className="mt-0.5 text-brandink"><I.Card/></span>
-        <div className="min-w-0 text-[14px]">{staff?<><b className="block text-[15px]">Se paga por adelantado con enlace</b><span className="text-muted">Al guardar, tendrás el enlace de pago para mandárselo por WhatsApp.</span></>
-          :<><b className="block text-[15px]">Se paga al reservar{q?`: ${eur(q.total)}`:''}</b><span className="text-muted">En el siguiente paso te llevamos a la página de pago segura: tarjeta o PayPal.</span><PayBadges className="mt-2"/></>}</div>
+      <div className="rounded-xl border border-line bg-surface p-3.5">
+        <div className="flex items-start gap-3">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-oksoft text-ok"><I.Lock size={18}/></span>
+          <div className="min-w-0 text-[14px]">{staff?<><b className="block text-[15px]">Se paga por adelantado con enlace</b><span className="text-muted">Al guardar, tendrás el enlace de pago para mandárselo por WhatsApp.</span></>
+            :<><b className="block text-[15px]">Pago 100 % seguro{q?` · ${eur(q.total)}`:''}</b><span className="text-muted">Pagas en el siguiente paso, en una página de pago segura. Nunca vemos ni guardamos los datos de tu tarjeta.</span></>}</div>
+        </div>
+        {!staff&&<div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-line pt-3"><span className="text-[13px] font-semibold text-muted">Aceptamos</span><PayBadges/></div>}
       </div>
       {!staff&&<label htmlFor="f-cond" className="mt-4 flex items-start gap-3 text-[14px]" data-err={errors.terms?1:0}>
         <input id="f-cond" type="checkbox" checked={f.terms} onChange={e=>set('terms',e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[var(--brand-strong)]"/>
@@ -655,8 +658,13 @@ function WaPreview({b}){
   </div>;
 }
 
+// Logos de las formas de pago aceptadas (siempre sobre fondo blanco, como piden las marcas)
+const LogoVisa=()=><svg viewBox="0 7.4 24 9.2" className="h-[15px] w-auto" role="img" aria-label="Visa"><path fill="#1A1F71" d="M9.112 8.262L5.97 15.758H3.92L2.374 9.775c-.094-.368-.175-.503-.461-.658C1.447 8.864.677 8.627 0 8.479l.046-.217h3.3a.904.904 0 01.894.764l.817 4.338 2.018-5.102zm8.033 5.049c.008-1.979-2.736-2.088-2.717-2.972.006-.269.262-.555.822-.628a3.66 3.66 0 011.913.336l.34-1.59a5.207 5.207 0 00-1.814-.333c-1.917 0-3.266 1.02-3.278 2.479-.012 1.079.963 1.68 1.698 2.04.756.367 1.01.603 1.006.931-.005.504-.602.725-1.16.734-.975.015-1.54-.263-1.992-.473l-.351 1.642c.453.208 1.289.39 2.156.398 2.037 0 3.37-1.006 3.377-2.564m5.061 2.447H24l-1.565-7.496h-1.656a.883.883 0 00-.826.55l-2.909 6.946h2.036l.405-1.12h2.488zm-2.163-2.656l1.02-2.815.588 2.815zm-8.16-4.84l-1.603 7.496H8.34l1.605-7.496z"/></svg>;
+const LogoMC=()=><svg viewBox="0 0 40 24" className="h-[22px] w-auto" role="img" aria-label="Mastercard"><circle cx="15" cy="12" r="10" fill="#EB001B"/><circle cx="25" cy="12" r="10" fill="#F79E1B"/><path fill="#FF5F00" d="M20 3.34A10 10 0 0 1 20 20.66A10 10 0 0 1 20 3.34Z"/></svg>;
+const LogoPayPal=()=><span role="img" aria-label="PayPal" className="flex items-center gap-1"><svg viewBox="0 0 24 24" className="h-[18px] w-auto" aria-hidden="true"><path fill="#003087" d="M7.016 19.198h-4.2a.562.562 0 0 1-.555-.65L5.093.584A.692.692 0 0 1 5.776 0h7.222c3.417 0 5.904 2.488 5.846 5.5-.006.25-.027.5-.066.747A6.794 6.794 0 0 1 12.071 12H8.743a.69.69 0 0 0-.682.583l-.325 2.056-.013.083-.692 4.39-.015.087zM19.79 6.142c-.01.087-.01.175-.023.261a7.76 7.76 0 0 1-7.695 6.598H9.007l-.283 1.795-.013.083-.692 4.39-.134.843-.014.088H6.86l-.497 3.15a.562.562 0 0 0 .555.65h3.612c.34 0 .63-.249.683-.585l.952-6.031a.692.692 0 0 1 .683-.584h2.126a6.793 6.793 0 0 0 6.707-5.752c.306-1.95-.466-3.744-1.89-4.906z"/></svg><span aria-hidden="true" className="text-[15px] font-extrabold italic leading-none tracking-tight"><span className="text-[#003087]">Pay</span><span className="text-[#0070BA]">Pal</span></span></span>;
+const PAY_LOGOS=[['visa',LogoVisa],['mc',LogoMC],['paypal',LogoPayPal]];
 function PayBadges({className=''}){
-  return <ul aria-label="Formas de pago" className={`flex flex-wrap gap-1.5 ${className}`}>{['Visa','Mastercard','PayPal'].map(m=><li key={m} className="rounded-md border border-line bg-surface px-2 py-0.5 text-[13px] font-bold text-ink">{m}</li>)}</ul>;
+  return <ul aria-label="Formas de pago aceptadas" className={`flex flex-wrap items-center gap-2 ${className}`}>{PAY_LOGOS.map(([k,L])=><li key={k} className="grid h-9 min-w-[58px] place-items-center rounded-md border border-line bg-white px-2.5"><L/></li>)}</ul>;
 }
 function PayDemo({total,onPay,onBack}){
   return <div className="mx-auto flex max-w-md flex-col gap-4">
@@ -665,7 +673,10 @@ function PayDemo({total,onPay,onBack}){
       <h2 className="text-[20px] font-extrabold">Página de pago segura</h2>
       <p className="mt-1 text-[14px] text-muted">En la web real, aquí se abre la página de pago de WooCommerce con las formas de pago que ya tiene activas.</p>
       <div className="mt-4 text-[32px] font-extrabold tnum">{eur(total)}</div>
-      <div className="mt-4 grid gap-2">{['Tarjeta','PayPal'].map(m=><button key={m} type="button" onClick={()=>onPay(m)} className="h-12 rounded-xl border border-line font-semibold hover:border-brand">{m}</button>)}</div>
+      <div className="mt-4 grid gap-2">
+        <button type="button" onClick={()=>onPay('Tarjeta')} className="flex h-14 items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 font-semibold hover:border-brand"><span className="flex items-center gap-2"><I.Card/>Tarjeta</span><span className="flex items-center gap-1.5" aria-hidden="true"><span className="grid h-8 place-items-center rounded border border-line bg-white px-1.5"><LogoVisa/></span><span className="grid h-8 place-items-center rounded border border-line bg-white px-1.5"><LogoMC/></span></span></button>
+        <button type="button" onClick={()=>onPay('PayPal')} aria-label="PayPal" className="flex h-14 items-center justify-center rounded-xl border border-line bg-white px-4 hover:border-brand"><LogoPayPal/></button>
+      </div>
       <p className="mt-3 text-[13px] text-muted">Demostración: no se cobra nada.</p>
     </div>
     <button type="button" onClick={onBack} className="text-[14px] font-semibold text-muted underline underline-offset-2">Volver al formulario</button>
