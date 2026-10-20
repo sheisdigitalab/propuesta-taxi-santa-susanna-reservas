@@ -585,10 +585,10 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
           :<><b className="block text-[15px]">Se paga al reservar{q?`: ${eur(q.total)}`:''}</b><span className="text-muted">Tarjeta (Redsys), Bizum o PayPal. En el siguiente paso eliges cómo, en una página de pago segura.</span></>}</div>
       </div>
       {!staff&&<label htmlFor="f-cond" className="mt-4 flex items-start gap-3 text-[14px]" data-err={errors.terms?1:0}>
-        <input id="f-cond" type="checkbox" checked={f.terms} onChange={e=>set('terms',e.target.checked)} className="mt-1 h-5 w-5 accent-[var(--brand-strong)]"/>
+        <input id="f-cond" type="checkbox" checked={f.terms} onChange={e=>set('terms',e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[var(--brand-strong)]"/>
         <span>He leído y acepto las condiciones del servicio y la política de privacidad.{errors.terms&&<span className="block font-semibold text-bad">{errors.terms}</span>}</span></label>}
       <label htmlFor="f-ofertas" className={`${staff?'mt-4':'mt-3'} flex items-start gap-3 text-[14px]`}>
-        <input id="f-ofertas" type="checkbox" checked={f.marketing} onChange={e=>set('marketing',e.target.checked)} className="mt-1 h-5 w-5 accent-[var(--brand-strong)]"/>
+        <input id="f-ofertas" type="checkbox" checked={f.marketing} onChange={e=>set('marketing',e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[var(--brand-strong)]"/>
         <span>{staff?'El cliente acepta recibir ofertas por email':'Quiero recibir ofertas y descuentos por email'} <span className="text-muted">(opcional, puedes darte de baja cuando quieras)</span></span></label>
     </Section>
     </div>
@@ -698,12 +698,12 @@ function TrendChart({bookings}){
         <p className="text-[13px] text-muted">{h?`${new Date(h.d+'T12:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'short'})}: ${h.n} reserva${h.n===1?'':'s'} · ${eur(h.eur)}`:'Pasa por encima de una barra para ver el detalle'}</p></div>
       <div className="text-right"><div className="text-[13px] text-muted">Últimos 7 días</div><div className="text-[20px] font-extrabold tnum">{thisW} <span className={`text-[13px] font-bold ${diff>=0?'text-ok':'text-bad'}`}>{diff>=0?'+':''}{diff} % vs. semana anterior</span></div></div>
     </div>
-    <div className="flex h-32 items-end gap-1.5" role="group" aria-label="Reservas por día de los últimos 14 días">
+    <div className="flex h-32 items-end" role="group" aria-label="Reservas por día de los últimos 14 días">
       {data.map((x,i)=><button key={x.d} type="button" onMouseEnter={()=>setHover(i)} onMouseLeave={()=>setHover(null)} onFocus={()=>setHover(i)} onBlur={()=>setHover(null)}
-        aria-label={`${dayLabel(x.d)}: ${x.n} reservas`} className="group flex h-full min-w-0 flex-1 flex-col justify-end">
+        aria-label={`${dayLabel(x.d)}: ${x.n} reservas`} className="group flex h-full min-w-0 flex-1 flex-col justify-end px-[3px]">
         <span className={`block w-full rounded-t-md transition ${x.d===TODAY?'bg-gold':i>=7?'bg-brand':'bg-line'} ${hover===i?'opacity-80':''}`} style={{height:`${Math.max(4,x.n/max*100)}%`}}></span></button>)}
     </div>
-    <div className="mt-1.5 flex gap-1.5 text-[12px] text-muted tnum">{data.map(x=><span key={x.d} className="min-w-0 flex-1 text-center">{x.d===TODAY?'Hoy':new Date(x.d+'T12:00').getDate()}</span>)}</div>
+    <div className="mt-1.5 flex text-[12px] text-muted tnum">{data.map(x=><span key={x.d} className="min-w-0 flex-1 text-center">{x.d===TODAY?'Hoy':new Date(x.d+'T12:00').getDate()}</span>)}</div>
   </div>;
 }
 function Today({bookings,open,assign,settings,onStatus}){
@@ -1144,7 +1144,7 @@ function Clients({bookings,open}){
     .sort((a,b)=>{const x=val[sort.k](a),y=val[sort.k](b);return (x<y?-1:x>y?1:0)*sort.dir||b.count-a.count});
   const lastTxt=c=>{const d=new Date(c.last+'T12:00');return c.last>=addDays(-1)&&c.last<=addDays(1)?dayLabel(c.last):d.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'2-digit'})};
   const Th=({k,children,right})=>{const on=sort.k===k;return <th className={`px-4 py-3 font-bold ${right?'text-right':''}`} aria-sort={on?(sort.dir>0?'ascending':'descending'):'none'}>
-    <button onClick={()=>setSort(s=>({k,dir:s.k===k?-s.dir:(k==='name'||k==='lang'?1:-1)}))} className={`inline-flex items-center gap-1 uppercase tracking-wider hover:text-ink ${on?'text-ink':''}`}>
+    <button onClick={()=>setSort(s=>({k,dir:s.k===k?-s.dir:(k==='name'||k==='lang'?1:-1)}))} className={`inline-flex min-h-[32px] items-center gap-1 uppercase tracking-wider hover:text-ink ${on?'text-ink':''}`}>
       {children}<span aria-hidden="true" className={on?'':'opacity-0'}>{sort.dir>0?'↑':'↓'}</span></button></th>};
   const latest=c=>c.list[c.list.length-1].id;
   return <div className="flex flex-col gap-4">
@@ -1290,7 +1290,7 @@ function Campaigns({bookings,settings,setSettings,campaigns,setCampaigns,toast,o
         <div className="text-[18px] font-extrabold"><span className="tnum">{reachable.length}</span> persona{reachable.length===1?'':'s'} recibirán este {channel==='email'?'email':'WhatsApp'}</div>
         <div className="text-[13px] text-muted">{inSeg.length-consent.length>0&&`${inSeg.length-consent.length} del grupo no aceptan ofertas y se quedan fuera. `}{noEmail>0&&`${noEmail} no tienen email. `}
           {channel==='whatsapp'?`Coste aproximado de Meta: ${new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(cost)}.`:'El email no tiene coste por envío.'}</div>
-        <button type="button" onClick={()=>setShowList(v=>!v)} aria-expanded={showList} className="mt-1 text-[13px] font-semibold text-brandink underline underline-offset-2">{showList?'Ocultar destinatarios':'Ver destinatarios'}</button>
+        <button type="button" onClick={()=>setShowList(v=>!v)} aria-expanded={showList} className="mt-1 inline-flex min-h-[44px] items-center text-[14px] font-semibold text-brandink underline underline-offset-2">{showList?'Ocultar destinatarios':'Ver destinatarios'}</button>
       </div>
       {!confirm?<button type="button" disabled={!reachable.length||!body.trim()} onClick={()=>setConfirm(true)} className="h-12 shrink-0 rounded-full bg-brandstrong px-6 font-bold text-white disabled:opacity-40">Enviar campaña</button>
         :<div className="flex shrink-0 flex-wrap items-center gap-2 rounded-xl bg-sunken p-2"><span className="px-1 text-[14px] font-semibold">¿Enviar a {reachable.length}?</span>
@@ -1382,7 +1382,7 @@ function Settings({settings,setSettings,onReset}){
           <Field label="Horas de trabajo al día" htmlFor="s-horas" hint="Para calcular cuánto está ocupado el taxi"><input id="s-horas" type="number" min="1" max="24" value={settings.workHours||14} onChange={e=>up('workHours',Math.max(1,Math.min(24,+e.target.value||1)))} className={inputCls}/></Field>
           <p className="flex items-center gap-2 self-end rounded-xl bg-sunken p-3.5 text-[14px] font-semibold"><I.Lock size={16}/>Todas las reservas se pagan por adelantado</p>
         </div>
-        <label className="mt-3 flex min-h-[44px] cursor-pointer items-center gap-3 text-[14px] font-semibold"><input type="checkbox" checked={!!settings.nightWeekends} onChange={e=>up('nightWeekends',e.target.checked)} className="h-5 w-5 accent-[var(--brand)]"/>Sábados, domingos y festivos con tarifa de noche todo el día</label>
+        <label className="mt-3 flex min-h-[44px] cursor-pointer items-center gap-3 text-[14px] font-semibold"><input type="checkbox" checked={!!settings.nightWeekends} onChange={e=>up('nightWeekends',e.target.checked)} className="h-5 w-5 shrink-0 accent-[var(--brand)]"/>Sábados, domingos y festivos con tarifa de noche todo el día</label>
         {settings.nightWeekends&&<Field label="Festivos (uno por línea, AAAA-MM-DD)" htmlFor="s-festivos" hint="Festivos de Cataluña ya puestos. Añade las fiestas locales de Santa Susanna."><textarea id="s-festivos" rows={4} value={(settings.holidays||[]).join('\n')} onChange={e=>up('holidays',e.target.value.split(/\s+/).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)))} className={inputCls+' h-auto py-2 tnum'}/></Field>}
         <p className="mt-3 text-[13px] text-muted">Horario de noche según tu web (20:00–08:00, fines de semana y festivos). Plazas y horas de trabajo: ajústalos a tu taxi.</p>
       </Section>
