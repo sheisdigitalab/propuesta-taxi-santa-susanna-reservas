@@ -333,11 +333,11 @@ function Section({title,icon:Icn,children,aside,className=''}){
 }
 function Field({label,htmlFor,children,hint,error}){
   return <label htmlFor={htmlFor} className="flex min-w-0 flex-col gap-1.5">
-    <span className="text-[13px] font-semibold uppercase tracking-wide text-muted">{label}</span>{children}
+    <span className="text-[14px] font-semibold text-ink">{label}</span>{children}
     {error ? <span className="text-[13px] font-semibold text-bad">{error}</span> : hint ? <span className="text-[13px] text-muted">{hint}</span> : null}
   </label>;
 }
-const inputCls = "h-12 w-full rounded-xl border border-line bg-surface px-3.5 text-[15px] outline-none focus:border-brand";
+const inputCls = "h-12 w-full rounded-xl border border-line bg-surface px-3.5 text-[16px] outline-none focus:border-brand";
 
 function Combo({id,value,onChange,options,placeholder,icon:Icn}){
   const [q,setQ]=useState(''); const [open,setOpen]=useState(false); const [hi,setHi]=useState(0); const ref=useRef(null);
@@ -352,7 +352,7 @@ function Combo({id,value,onChange,options,placeholder,icon:Icn}){
     <div className="flex h-12 items-center gap-2 rounded-xl border border-line bg-surface px-3.5 focus-within:border-brand">
       <span className="text-muted">{Icn&&<Icn/>}</span>
       <input id={id} role="combobox" aria-expanded={open} aria-controls={id+'-lista'} aria-autocomplete="list" aria-activedescendant={open&&list[hi]?id+'-opt-'+hi:undefined} autoComplete="off"
-        className="h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted"
+        className="h-full min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-muted"
         placeholder={value?value.label:placeholder} value={open?q:(value?value.label:'')}
         onFocus={()=>{setOpen(true);setHi(0)}} onChange={e=>{setQ(e.target.value);setOpen(true);setHi(0)}}
         onKeyDown={e=>{if(e.key==='ArrowDown'){e.preventDefault();setHi(h=>Math.min(h+1,list.length-1))}else if(e.key==='ArrowUp'){e.preventDefault();setHi(h=>Math.max(h-1,0))}else if(e.key==='Enter'&&open&&list[hi]){e.preventDefault();pick(list[hi])}else if(e.key==='Escape'){setOpen(false)}}}/>
@@ -386,7 +386,7 @@ const emptyForm = () => ({from:null,to:null,date:TODAY,time:'',roundTrip:false,r
   wheelFoldable:true,name:'',prefix:'+34',phone:'',email:'',flight:'',notes:'',payment:'online',terms:false,marketing:false,channel:'web'});
 
 function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefill}){
-  const [showExtras,setShowExtras]=useState(false);
+  const [showExtras,setShowExtras]=useState(false); const [arrive,setArrive]=useState(false);
   const [f,setF]=useState(()=>({...emptyForm(),...(prefill||{})})); const [errors,setErrors]=useState({}); const [done,setDone]=useState(null); const [paying,setPaying]=useState(null);
   const ERR_OF={from:'route',to:'route',date:'date',time:'time',retDate:'ret',retTime:'ret',pax:'pax',extras:'pax',name:'name',phone:'phone',email:'email',terms:'terms'};
   const set=(k,v)=>{setF(p=>({...p,[k]:v,...(k==='date'&&v&&p.retDate<v?{retDate:v}:{})}));const ek=ERR_OF[k];if(ek)setErrors(e=>{if(!e[ek])return e;const n={...e};delete n[ek];return n})};
@@ -474,12 +474,16 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
 
     <Section title={staff?"Trayecto":"1. ¿A dónde vas?"} icon={I.Route}>
       {!staff&&!q&&<div className="mb-4">
-        <h3 className="mb-2 text-[13px] font-semibold text-muted">Traslados en taxi desde Santa Susanna más reservados</h3>
-        <div className="grid grid-cols-2 gap-2">{quick.map(n=>{const t=settings.tarifas.find(x=>x.name===n);if(!t)return null;const on=f.to&&f.to.label===n;const dur=(t.info.split('·')[1]||'').trim();
-          return <button type="button" key={n} onClick={()=>setQuick('to',n)} aria-pressed={!!on} className={`rounded-xl border p-3 text-left transition ${on?'border-brand bg-brandsoft':'border-line hover:border-brand'}`}>
-            <span className="block text-[12px] font-semibold uppercase tracking-wide text-muted">Santa Susanna →</span><span className="block text-[14px] font-semibold leading-snug">{n.replace('Aeropuerto Barcelona-El Prat','Aeropuerto de Barcelona (El Prat)').replace('Aeropuerto Girona-Costa Brava','Aeropuerto de Girona')}</span>
+        <h3 className="mb-2 text-[14px] font-semibold text-ink">Traslados en taxi más reservados</h3>
+        <div className="mb-3 grid grid-cols-2 gap-1 rounded-full bg-sunken p-1" role="group" aria-label="Sentido del viaje">
+          {[[false,'Salgo de Santa Susanna'],[true,'Llego a Santa Susanna']].map(([v,l])=><button type="button" key={l} aria-pressed={arrive===v} onClick={()=>setArrive(v)}
+            className={`min-h-[44px] rounded-full px-3 text-[14px] font-semibold leading-tight ${arrive===v?'bg-deep text-white':'text-ink hover:bg-surface'}`}>{l}</button>)}
+        </div>
+        <div className="grid grid-cols-2 gap-2">{quick.map(n=>{const t=settings.tarifas.find(x=>x.name===n);if(!t)return null;const on=(arrive?f.from:f.to)&&(arrive?f.from:f.to).label===n;const dur=(t.info.split('·')[1]||'').trim();
+          return <button type="button" key={n} onClick={()=>setQuick(arrive?'from':'to',n)} aria-pressed={!!on} className={`rounded-xl border p-3 text-left transition ${on?'border-brand bg-brandsoft':'border-line hover:border-brand'}`}>
+            <span className="block text-[12px] font-semibold uppercase tracking-wide text-muted">{arrive?'→ Santa Susanna desde':'Santa Susanna →'}</span><span className="block text-[14px] font-semibold leading-snug">{n.replace('Aeropuerto Barcelona-El Prat','Aeropuerto de Barcelona (El Prat)').replace('Aeropuerto Girona-Costa Brava','Aeropuerto de Girona')}</span>
             <span className="mt-1 block text-[13px] text-muted">desde <b className="text-[15px] text-ink tnum">{eur(t.day)}</b></span>{dur&&<span className="block text-[12px] text-muted">{dur}</span>}</button>})}</div>
-        <p className="mt-2 text-[13px] text-muted">¿Llegas en avión o tren? Elige el aeropuerto o la estación y pulsa <span aria-hidden="true">⇅</span> para invertir el trayecto.</p>
+        <p className="mt-2 text-[13px] text-muted">{arrive?'Después, elige tu hotel o dirección en Santa Susanna.':'Después, elige tu hotel o dirección de recogida en Santa Susanna.'}</p>
       </div>}
       <div className="grid gap-2" data-err={errors.route?1:0}>
         <Field label="Desde" htmlFor="f-desde"><Combo id="f-desde" value={f.from} onChange={v=>set('from',v)} options={fromOpts} placeholder="Hotel, aeropuerto, estación…" icon={I.Pin}/></Field>
@@ -567,14 +571,14 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Nombre y apellidos" htmlFor="f-nombre" error={errors.name}><input id="f-nombre" autoComplete="name" value={f.name} onChange={e=>set('name',e.target.value)} className={inputCls} data-err={errors.name?1:0}/></Field>
         <Field label="Teléfono (WhatsApp)" htmlFor="f-tel" error={errors.phone} hint="Por si tenemos que avisarte el día del viaje">
-          <div className="flex gap-2"><select id="f-prefijo" aria-label="Prefijo" value={f.prefix} onChange={e=>set('prefix',e.target.value)} className="h-12 rounded-xl border border-line bg-surface px-2">
+          <div className="flex gap-2"><select id="f-prefijo" aria-label="Prefijo" value={f.prefix} onChange={e=>set('prefix',e.target.value)} className="h-12 rounded-xl border border-line bg-surface px-2 text-[16px]">
             {['+34','+44','+33','+49','+31','+32','+39','+351','+353','+41','+43','+45','+46','+47','+48','+420','+1'].map(p=><option key={p}>{p}</option>)}</select>
-          <input id="f-tel" type="tel" autoComplete="tel-national" inputMode="tel" value={f.phone} onChange={e=>set('phone',e.target.value)} className={inputCls} data-err={errors.phone?1:0}/></div></Field>
+          <input id="f-tel" type="tel" autoComplete="tel-national" inputMode="tel" value={f.phone} onChange={e=>set('phone',e.target.value)} onBlur={()=>{if(f.phone.trim()&&f.phone.replace(/\D/g,'').length<6)setErrors(e=>({...e,phone:'Escribe un teléfono válido.'}))}} aria-invalid={!!errors.phone} className={inputCls} data-err={errors.phone?1:0}/></div></Field>
         <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
-          <Field label="Email" htmlFor="f-email" error={errors.email} hint={staff?'Opcional: si lo tiene, le llega la confirmación':'Te enviamos aquí la confirmación'}><input id="f-email" type="email" autoComplete="email" value={f.email} onChange={e=>set('email',e.target.value)} className={inputCls} data-err={errors.email?1:0}/></Field>
-          {airport&&<Field label="Número de vuelo" htmlFor="f-vuelo" hint="Seguimos tu vuelo y te esperamos en llegadas con un cartel con tu nombre"><input id="f-vuelo" value={f.flight} onChange={e=>set('flight',e.target.value.toUpperCase())} placeholder="VY 1234" className={inputCls}/></Field>}
+          <Field label="Email" htmlFor="f-email" error={errors.email} hint={staff?'Opcional: si lo tiene, le llega la confirmación':'Te enviamos aquí la confirmación'}><input id="f-email" type="email" autoComplete="email" inputMode="email" value={f.email} onChange={e=>set('email',e.target.value)} onBlur={()=>{if(f.email.trim()&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim()))setErrors(e=>({...e,email:'Revisa el email: parece que falta algo (ej. nombre@gmail.com).'}))}} aria-invalid={!!errors.email} className={inputCls} data-err={errors.email?1:0}/></Field>
+          {airport&&<Field label="Número de vuelo" htmlFor="f-vuelo" hint="Seguimos tu vuelo y te esperamos en llegadas con un cartel con tu nombre"><input id="f-vuelo" autoCapitalize="characters" value={f.flight} onChange={e=>set('flight',e.target.value.toUpperCase())} placeholder="VY 1234" className={inputCls}/></Field>}
         </div>
-        <div className="sm:col-span-2"><Field label="Comentarios" htmlFor="f-notas"><textarea id="f-notas" rows={2} value={f.notes} onChange={e=>set('notes',e.target.value)} className="w-full rounded-xl border border-line bg-surface p-3.5 outline-none focus:border-brand" placeholder="Número de habitación, parada adicional, algo que debamos saber…"/></Field></div>
+        <div className="sm:col-span-2"><Field label="Comentarios" htmlFor="f-notas"><textarea id="f-notas" rows={2} value={f.notes} onChange={e=>set('notes',e.target.value)} className="w-full rounded-xl border border-line bg-surface p-3.5 text-[16px] outline-none focus:border-brand" placeholder="Número de habitación, parada adicional, algo que debamos saber…"/></Field></div>
       </div>
     </Section>
 
@@ -582,7 +586,7 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
       <div className="flex items-start gap-3 rounded-xl border border-brand bg-brandsoft p-3.5">
         <span className="mt-0.5 text-brandink"><I.Card/></span>
         <div className="min-w-0 text-[14px]">{staff?<><b className="block text-[15px]">Se paga por adelantado con enlace</b><span className="text-muted">Al guardar, tendrás el enlace de pago para mandárselo por WhatsApp.</span></>
-          :<><b className="block text-[15px]">Se paga al reservar{q?`: ${eur(q.total)}`:''}</b><span className="text-muted">Tarjeta (Redsys), Bizum o PayPal. En el siguiente paso eliges cómo, en una página de pago segura.</span></>}</div>
+          :<><b className="block text-[15px]">Se paga al reservar{q?`: ${eur(q.total)}`:''}</b><span className="text-muted">En el siguiente paso te llevamos a la pasarela segura de tu banco (Redsys) o a PayPal.</span><PayBadges className="mt-2"/></>}</div>
       </div>
       {!staff&&<label htmlFor="f-cond" className="mt-4 flex items-start gap-3 text-[14px]" data-err={errors.terms?1:0}>
         <input id="f-cond" type="checkbox" checked={f.terms} onChange={e=>set('terms',e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[var(--brand-strong)]"/>
@@ -598,7 +602,7 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
         <div className="bg-deep p-5 text-white">
           <div className="text-[12px] font-bold uppercase tracking-wider text-[#FFD940]">Resumen</div>
           {q?<><div className="mt-2 text-[15px] font-semibold leading-snug">{tripName({dir,ss:ss.label,dest:dest.label})}</div>
-            <div className="mt-3 text-[34px] font-extrabold leading-none tnum">{eur(q.total)}</div><div className="mt-1 text-[13px] text-ondeep">Precio fijo, sin sorpresas</div></>
+            <div className="mt-3 text-[34px] font-extrabold leading-none tnum">{eur(q.total)}</div><div className="mt-1 text-[13px] text-ondeep">{staff?'Precio fijo, sin sorpresas':'Precio cerrado: peajes, IVA y propinas incluidos'}</div></>
             :<p className="mt-2 text-[14px] text-ondeep">Elige desde dónde y a dónde vas para ver el precio.</p>}
         </div>
         <dl className="divide-y divide-line px-5 text-[14px]">
@@ -613,7 +617,8 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
           ].map(([k,v])=><div key={k} className="flex justify-between gap-3 py-2.5"><dt className="text-muted">{k}</dt><dd className={`text-right font-semibold tnum ${v==='Falta la hora'?'text-warn':''}`}>{v}</dd></div>)}
         </dl>
         <div className="p-5 pt-2"><button type="submit" className="h-12 w-full rounded-full bg-brandstrong font-bold text-white hover:opacity-90">{q?(staff?`Reservar · ${eur(q.total)}`:f.payment==='online'?`Reservar y pagar ${eur(q.total)}`:`Reservar · ${eur(q.total)}`):'Reservar'}</button>
-          <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-[13px] text-muted">{!staff&&f.payment==='online'&&<I.Lock size={14}/>}{staff?'Se guarda como «Por confirmar»':(f.payment==='online'?'Pago seguro con tarjeta, Bizum o PayPal':'Te enviamos la confirmación por email')}</p></div>
+          <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-[13px] text-muted">{!staff&&f.payment==='online'&&<I.Lock size={14}/>}{staff?'Se guarda como «Por confirmar»':(f.payment==='online'?'Pasarela segura de tu banco':'Te enviamos la confirmación por email')}</p>
+          {!staff&&<><PayBadges className="mt-2 justify-center"/><p className="mt-3 text-center text-[13px] text-muted">Cancelación gratis hasta 3 h antes</p></>}</div>
       </div>
     </aside>
 
@@ -621,8 +626,9 @@ function BookingForm({settings,onCreate,staff,panel,onSeeInPanel,bookings,prefil
       <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 pt-3">
         <div className="min-w-0"><div className="text-[13px] text-muted">{q?`${tripName({dir,ss:ss.label,dest:dest.label})}`:'Elige el trayecto para ver el precio'}</div>
           <div className="text-[20px] font-extrabold tnum">{q?eur(q.total):'—'}{q&&q.extras>0&&<span className="ml-2 text-[13px] font-semibold text-muted">incl. {eur(q.extras)} de extras</span>}</div></div>
-        <button type="submit" className="h-12 shrink-0 rounded-full bg-brandstrong px-6 font-bold text-white hover:opacity-90">{q?`Reservar · ${eur(q.total)}`:'Reservar'}</button>
+        <button type="submit" className="h-12 shrink-0 rounded-full bg-brandstrong px-6 font-bold text-white hover:opacity-90">{staff?(q?`Reservar · ${eur(q.total)}`:'Reservar'):(q?'Reservar y pagar':'Reservar')}</button>
       </div>
+      {!staff&&q&&<p className="mx-auto max-w-2xl pt-1 text-[13px] text-muted">Peajes, IVA y propinas incluidos · Cancelación gratis hasta 3 h antes</p>}
     </div>
   </form>;
 }
@@ -639,11 +645,14 @@ function WaPreview({b}){
   </div>;
 }
 
+function PayBadges({className=''}){
+  return <ul aria-label="Formas de pago" className={`flex flex-wrap gap-1.5 ${className}`}>{['Visa','Mastercard','Bizum','PayPal'].map(m=><li key={m} className="rounded-md border border-line bg-surface px-2 py-0.5 text-[13px] font-bold text-ink">{m}</li>)}</ul>;
+}
 function PayDemo({total,onPay,onBack}){
   return <div className="mx-auto flex max-w-md flex-col gap-4">
     <div className="rounded-2xl border border-line bg-surface p-6 text-center">
       <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-brandsoft text-brandink"><I.Card/></div>
-      <h2 className="text-[20px] font-extrabold">Pago seguro</h2>
+      <h2 className="text-[20px] font-extrabold">Pasarela segura de tu banco</h2>
       <p className="mt-1 text-[14px] text-muted">En la web real, aquí se abre la página de pago de WooCommerce con las formas de pago que ya tiene activas.</p>
       <div className="mt-4 text-[32px] font-extrabold tnum">{eur(total)}</div>
       <div className="mt-4 grid gap-2">{['Tarjeta (Redsys)','Bizum','PayPal'].map(m=><button key={m} type="button" onClick={()=>onPay(m)} className="h-12 rounded-xl border border-line font-semibold hover:border-brand">{m}</button>)}</div>
@@ -1483,11 +1492,14 @@ function ClientSite({settings,bookings,onCreate,onSeeInPanel,theme,setTheme}){
     <section className="text-center text-white" style={{background:'linear-gradient(#002313 0%, #004726 100%)'}}>
       <div className="mx-auto max-w-3xl pb-11 pt-14 sm:pb-14 sm:pt-16" style={pad}>
         <h1 className="text-[32px] font-extrabold leading-tight sm:text-[44px]">Reserva tu taxi <span className="text-[#FFD940]">a precio fijo</span></h1>
-        <p className="mt-3 text-[16px] text-white/90 sm:text-[18px]">Elige tu destino, la forma de pago y recíbelo en tu email.</p>
+        <p className="mt-3 text-[16px] text-white/90 sm:text-[18px]">Precio cerrado al momento. Confirmación inmediata en tu email.</p>
       </div>
     </section>
     <div className="mx-auto max-w-6xl py-5" style={pad}>
-      <TrustBlock/>
+      <div className="hidden md:block"><TrustBlock/></div>
+      <ul aria-label="Qué incluye tu reserva" className="mb-5 grid gap-1.5 rounded-2xl border border-line bg-surface p-4 text-[14px] md:hidden">
+        {['Precio cerrado: peajes, IVA y propinas incluidos','Cambia o cancela gratis hasta 3 h antes','Si fallamos, te devolvemos el 150 %','Sillitas sin coste · vans de hasta 8 plazas bajo consulta'].map(x=><li key={x} className="flex gap-2"><span aria-hidden="true" className="font-bold text-brandink">✓</span>{x}</li>)}
+      </ul>
       <BookingForm settings={settings} onCreate={onCreate} onSeeInPanel={onSeeInPanel} bookings={bookings}/>
       <p className="mt-6 text-center text-[13px] text-muted">El formulario se muestra en castellano, català o English según el idioma de la web.</p>
     </div>
